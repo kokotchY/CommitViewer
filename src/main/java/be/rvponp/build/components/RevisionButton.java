@@ -1,13 +1,19 @@
 package be.rvponp.build.components;
 
+import be.rvponp.build.util.Util;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FileResource;
 import com.vaadin.server.Resource;
+import com.vaadin.server.VaadinService;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.VerticalLayout;
+import org.apache.commons.io.FilenameUtils;
 
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -37,8 +43,33 @@ public class RevisionButton extends Button implements Button.ClickListener {
         files.removeAllComponents();
         for (Object o : changedPaths.entrySet()) {
             Map.Entry entry = (Map.Entry)o;
-            files.addComponent(new Link(entry.getValue()+" "+entry.getKey(), createLinkViewVc(entry, revision)));
+            if (Util.isFile(entry.getKey())) {
+                HorizontalLayout layout = new HorizontalLayout();
+                String key = entry.getKey().toString();
+                char type = entry.getValue().toString().charAt(0);
+                switch (type) {
+                    case 'M':
+                        layout.addComponent(createImageFromName("edit"));
+                        break;
+                    case 'A':
+                        layout.addComponent(createImageFromName("add"));
+                        break;
+                    case 'D':
+                        layout.addComponent(createImageFromName("delete"));
+                        break;
+                    default:
+                        layout.addComponent(createImageFromName("edit"));
+                }
+                layout.addComponent(new Label(""+type));
+                layout.addComponent(new Link(key, createLinkViewVc(entry, revision)));
+                files.addComponent(layout);
+            }
         }
+    }
+
+    private Image createImageFromName(String imageName) {
+        String path = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
+        return new Image(null, new FileResource(new File(path + "/WEB-INF/images/" + imageName + ".png")));
     }
 
     private Resource createLinkViewVc(Map.Entry entry, long revision) {

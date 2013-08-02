@@ -1,10 +1,13 @@
 package be.rvponp.build.components;
 
 import be.rvponp.build.util.JiraLinkCommitParser;
+import be.rvponp.build.util.Util;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
@@ -47,13 +50,15 @@ public class CompareButton extends Button implements Button.ClickListener {
     private final ComboBox toVersion;
     private final Table table;
     private final VerticalLayout files;
+    private final ListSelect filterJira;
 
-    public CompareButton(ComboBox fromVersion, ComboBox toVersion, Table table, VerticalLayout files) {
+    public CompareButton(ComboBox fromVersion, ComboBox toVersion, Table table, VerticalLayout files, ListSelect filterJira) {
         super("Compare");
         this.fromVersion = fromVersion;
         this.toVersion = toVersion;
         this.table = table;
         this.files = files;
+        this.filterJira = filterJira;
         addClickListener(this);
     }
 
@@ -71,6 +76,7 @@ public class CompareButton extends Button implements Button.ClickListener {
         }
         Notification.show("Start comparison between " + fromVersion.getValue() + " and " + toVersion.getValue());
         table.removeAllItems();
+        files.removeAllComponents();
         long startRevision = getRevision(repository, fromVersion.getValue());
         System.out.println("Start revision: "+startRevision);
         long endRevision;
@@ -87,7 +93,7 @@ public class CompareButton extends Button implements Button.ClickListener {
                 int index = 0;
                 for (Object o : log) {
                     SVNLogEntry entry = (SVNLogEntry) o;
-                    int nbFiles = entry.getChangedPaths().size();
+                    int nbFiles = getNumberFiles(entry);
                     Label message = new Label(JiraLinkCommitParser.parseJiraLink(entry.getMessage()));
                     message.setContentMode(ContentMode.HTML);
                     long revision = entry.getRevision();
@@ -99,6 +105,18 @@ public class CompareButton extends Button implements Button.ClickListener {
                 e.printStackTrace();
             }
         }
+    }
+
+    private int getNumberFiles(SVNLogEntry entry) {
+        int nb = 0;
+        for (Object o : entry.getChangedPaths().values()) {
+            System.out.println("Testing "+o);
+            if (Util.isFile(o)) {
+                System.out.println("Path "+o+" is a file");
+                nb++;
+            }
+        }
+        return nb;
     }
 
     private long getRevision(SVNRepository repository, Object value) {
@@ -119,9 +137,8 @@ public class CompareButton extends Button implements Button.ClickListener {
                     SVNProperties revisionProperties = repository.getRevisionProperties(revision, null);
                     String dateRevision = revisionProperties.getStringValue(SVNRevisionProperty.DATE);
                     SimpleDateFormat revisionFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS");
-                    DateTime dateTime1 = new DateTime(revisionFormat.parse(dateRevision)).withFieldAdded(DurationFieldType.hours(), 2);
-                    if (dateTime1.isBefore(new DateTime(date))) {
-                        System.out.println(dateTime1+" is before "+date);
+                    DateTime dateTime = new DateTime(revisionFormat.parse(dateRevision));
+                    if (dateTime.isBefore(new DateTime(date))) {
                         return revision+1;
                     } else {
                         return revision;
