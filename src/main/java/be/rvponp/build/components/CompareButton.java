@@ -110,9 +110,7 @@ public class CompareButton extends Button implements Button.ClickListener {
     private int getNumberFiles(SVNLogEntry entry) {
         int nb = 0;
         for (Object o : entry.getChangedPaths().values()) {
-            System.out.println("Testing "+o);
             if (Util.isFile(o)) {
-                System.out.println("Path "+o+" is a file");
                 nb++;
             }
         }
