@@ -17,18 +17,10 @@ package be.rvponp.build;
 
 import be.rvponp.build.components.CompareButton;
 import be.rvponp.build.components.RefreshButton;
-import be.rvponp.build.util.ReleaseUtil;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.*;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * The Application's "main" class
@@ -55,9 +47,11 @@ public class CommitViewerUI extends UI
         table = new Table("Commits");
         table.addContainerProperty("Revision", Button.class, 0L);
         table.addContainerProperty("Date", Date.class, new Date());
+        table.addContainerProperty("Message", HorizontalLayout.class, "Message");
         table.addContainerProperty("Author", String.class, "Author");
-        table.addContainerProperty("Message", Label.class, "Message");
         table.addContainerProperty("# Files", Integer.class, 0);
+        //Object[] columns = new Object[]{"Revision", "Date","Jiras","Message", "Author","# Files"};
+        //table.setVisibleColumns(columns);
 
         table.setSizeFull();
         files = new VerticalLayout();
@@ -68,6 +62,7 @@ public class CommitViewerUI extends UI
         layout.addComponent(formLayout);
         layout.addComponent(table);
         layout.addComponent(files);
+
 
         setContent(layout);
     }

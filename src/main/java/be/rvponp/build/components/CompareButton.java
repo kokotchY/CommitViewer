@@ -1,13 +1,11 @@
 package be.rvponp.build.components;
 
+import be.rvponp.build.util.Jira;
+import be.rvponp.build.util.JiraEntry;
 import be.rvponp.build.util.JiraLinkCommitParser;
+import com.vaadin.server.ThemeResource;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.*;
 import com.vaadin.ui.themes.BaseTheme;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -29,10 +27,7 @@ import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -88,12 +83,12 @@ public class CompareButton extends Button implements Button.ClickListener {
                 for (Object o : log) {
                     SVNLogEntry entry = (SVNLogEntry) o;
                     int nbFiles = entry.getChangedPaths().size();
-                    Label message = new Label(JiraLinkCommitParser.parseJiraLink(entry.getMessage()));
-                    message.setContentMode(ContentMode.HTML);
+                    //message.setContentMode(ContentMode.HTML);
                     long revision = entry.getRevision();
                     RevisionButton buttonRevision = new RevisionButton(revision, entry.getChangedPaths(), files);
                     buttonRevision.setStyleName(BaseTheme.BUTTON_LINK);
-                    table.addItem(new Object[]{buttonRevision, entry.getDate(), entry.getAuthor(), message, nbFiles}, index++);
+                    table.addItem(new Object[]{buttonRevision, entry.getDate(), generateJiraButtonWithMessage(entry.getMessage()), entry.getAuthor(), nbFiles}, index++);
+                    //table.addGeneratedColumn("Jiras",new MessageColumnGenerator(JiraLinkCommitParser.parseJiraIdentifier(entry.getMessage())));
                 }
             } catch (SVNException e) {
                 e.printStackTrace();
@@ -145,4 +140,45 @@ public class CompareButton extends Button implements Button.ClickListener {
         }
         return 0L;
     }
+
+    private Component generateJiraButton(List<String> jiraIds) {
+
+        HorizontalLayout returnComponent = new HorizontalLayout();
+        if( jiraIds != null)
+        {
+            for(String s : jiraIds){
+                returnComponent.addComponent(new Button(s));
+            }
+        }
+
+        return returnComponent;
+    }
+
+    private Component generateJiraButtonWithMessage(String message){
+        String PATTERN_JIRA = "([A-Z]+-[0-9]+)";
+        String messageWithoutJiraIds = message.replaceAll(PATTERN_JIRA, "§");
+        StringTokenizer tokens = new StringTokenizer(messageWithoutJiraIds, "§", true);
+
+        List<JiraEntry> jiraIds = JiraLinkCommitParser.parseJiraIdentifier(message);
+        HorizontalLayout returnComponent = new HorizontalLayout();
+        int i = 0;
+        if(!jiraIds.isEmpty())
+        {
+            while(tokens.hasMoreTokens()){
+                String tok = tokens.nextToken();
+                if(tok.equals("§")){
+                    Button b = new Button(jiraIds.get(i++).toString());
+                    b.setIcon(new ThemeResource("http://jira:8080/images/icons/status_open.gif"));
+                    returnComponent.addComponent(b);
+                }else{
+                    returnComponent.addComponent(new Label(tok));
+                }
+            }
+        }else{
+            returnComponent.addComponent(new Label(message));
+        }
+
+        return returnComponent;
+    }
+
 }

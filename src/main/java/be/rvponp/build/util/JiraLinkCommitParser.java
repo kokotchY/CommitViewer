@@ -1,5 +1,6 @@
 package be.rvponp.build.util;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,15 +21,24 @@ public class JiraLinkCommitParser {
      * @param text String to parse
      * @return New string with the jira identifier replaced with a link to it
      */
-    public static String parseJiraLink(String text) {
+    public static List<JiraEntry> parseJiraIdentifier(String text) {
         Pattern pattern = Pattern.compile("([A-Z]+-[0-9]+)");
         Matcher matcher = pattern.matcher(text);
-        String result = text;
-        while (matcher.find()) {
-            String jiraId = matcher.group(1);
-            String url = jiraUrl + jiraId;
-            result = matcher.replaceAll("<a href=\"" + url + "\">" + jiraId + "</a>");
+        List<JiraEntry> result = new ArrayList<JiraEntry>();
+        while(matcher.find()){
+            result.add(Jira.getJiraById(matcher.group().trim()));
         }
+//        while (matcher.find()) {
+//            String jiraId = matcher.group(1);
+//            String url = jiraUrl + jiraId;
+//            JiraEntry jiraEntry = Jira.getJiraById(jiraId);
+//            if(jiraEntry == null){
+//
+//
+//                result = matcher.replaceAll("<a href=\"" + url + "\">" + jiraId +"</a>");
+//            }else
+//                result = matcher.replaceAll("<a href=\"" + url + "\">" + jiraId +"("+jiraEntry+")</a>");
+//        }
         return result;
     }
 
