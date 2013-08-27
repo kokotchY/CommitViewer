@@ -100,8 +100,8 @@
           </webAppConfig>
           <systemProperties>
             <systemProperty>
-                    <name>ADConfigFile</name>
-                    <value>pouet pouet</value>
+                    <name>cv.config</name>
+                    <value>/home/vermb/Desktop/CommitViewer.properties</value>
              </systemProperty>
           </systemProperties>
         </configuration>

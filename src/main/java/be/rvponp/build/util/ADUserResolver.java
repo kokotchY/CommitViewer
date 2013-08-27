@@ -18,7 +18,7 @@ import java.util.Properties;
  */
 public class ADUserResolver {
 
-    private static final String SYSTEM_PROPERTY_NAME = "";
+    private static final String SYSTEM_PROPERTY_NAME = "cv.config";
     private static final String AD_URL = "ad.url";
     private static final String AD_USER = "ad.user";
     private static final String AD_PWD = "ad.pwd";
@@ -30,7 +30,7 @@ public class ADUserResolver {
         Properties configFile = new Properties();
 
         try {
-            configFile.load(new FileInputStream(new File("/home/vermb/Desktop/CommitViewer.properties")));
+            configFile.load(new FileInputStream(new File(System.getProperty(SYSTEM_PROPERTY_NAME))));
         } catch (IOException e) {
             System.err.println("Looking for "+SYSTEM_PROPERTY_NAME+"  property. File not found.");
             e.printStackTrace();
