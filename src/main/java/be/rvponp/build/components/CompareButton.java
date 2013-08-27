@@ -1,10 +1,13 @@
 package be.rvponp.build.components;
 
-import be.rvponp.build.util.Jira;
+import be.rvponp.build.util.ADUserResolver;
 import be.rvponp.build.util.JiraEntry;
 import be.rvponp.build.util.JiraLinkCommitParser;
+import be.rvponp.build.util.JiraStatus;
+import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FileResource;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.server.VaadinService;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.BaseTheme;
 import org.apache.http.HttpEntity;
@@ -24,6 +27,7 @@ import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -42,6 +46,7 @@ public class CompareButton extends Button implements Button.ClickListener {
     private final ComboBox toVersion;
     private final Table table;
     private final VerticalLayout files;
+    private final String pathIcon = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
 
     public CompareButton(ComboBox fromVersion, ComboBox toVersion, Table table, VerticalLayout files) {
         super("Compare");
@@ -50,6 +55,7 @@ public class CompareButton extends Button implements Button.ClickListener {
         this.table = table;
         this.files = files;
         addClickListener(this);
+        this.setIcon(new ThemeResource("img/view.png"));
     }
 
 
@@ -67,7 +73,7 @@ public class CompareButton extends Button implements Button.ClickListener {
         Notification.show("Start comparison between " + fromVersion.getValue() + " and " + toVersion.getValue());
         table.removeAllItems();
         long startRevision = getRevision(repository, fromVersion.getValue());
-        System.out.println("Start revision: "+startRevision);
+        System.out.println("Start revision: " + startRevision);
         long endRevision;
         if (toVersion.getValue() == null) {
             endRevision = -1;
@@ -87,7 +93,7 @@ public class CompareButton extends Button implements Button.ClickListener {
                     long revision = entry.getRevision();
                     RevisionButton buttonRevision = new RevisionButton(revision, entry.getChangedPaths(), files);
                     buttonRevision.setStyleName(BaseTheme.BUTTON_LINK);
-                    table.addItem(new Object[]{buttonRevision, entry.getDate(), generateJiraButtonWithMessage(entry.getMessage()), entry.getAuthor(), nbFiles}, index++);
+                    table.addItem(new Object[]{buttonRevision, entry.getDate(), new MessageLayout(entry.getMessage())/*generateJiraButtonWithMessage(entry.getMessage())*/, new JiraAssigneesLayout(JiraLinkCommitParser.parseJiraIdentifier(entry.getMessage())), new Label(ADUserResolver.getFullUsernameByID(entry.getAuthor())), nbFiles}, index++);
                     //table.addGeneratedColumn("Jiras",new MessageColumnGenerator(JiraLinkCommitParser.parseJiraIdentifier(entry.getMessage())));
                 }
             } catch (SVNException e) {
@@ -141,44 +147,7 @@ public class CompareButton extends Button implements Button.ClickListener {
         return 0L;
     }
 
-    private Component generateJiraButton(List<String> jiraIds) {
 
-        HorizontalLayout returnComponent = new HorizontalLayout();
-        if( jiraIds != null)
-        {
-            for(String s : jiraIds){
-                returnComponent.addComponent(new Button(s));
-            }
-        }
 
-        return returnComponent;
-    }
-
-    private Component generateJiraButtonWithMessage(String message){
-        String PATTERN_JIRA = "([A-Z]+-[0-9]+)";
-        String messageWithoutJiraIds = message.replaceAll(PATTERN_JIRA, "§");
-        StringTokenizer tokens = new StringTokenizer(messageWithoutJiraIds, "§", true);
-
-        List<JiraEntry> jiraIds = JiraLinkCommitParser.parseJiraIdentifier(message);
-        HorizontalLayout returnComponent = new HorizontalLayout();
-        int i = 0;
-        if(!jiraIds.isEmpty())
-        {
-            while(tokens.hasMoreTokens()){
-                String tok = tokens.nextToken();
-                if(tok.equals("§")){
-                    Button b = new Button(jiraIds.get(i++).toString());
-                    b.setIcon(new ThemeResource("http://jira:8080/images/icons/status_open.gif"));
-                    returnComponent.addComponent(b);
-                }else{
-                    returnComponent.addComponent(new Label(tok));
-                }
-            }
-        }else{
-            returnComponent.addComponent(new Label(message));
-        }
-
-        return returnComponent;
-    }
 
 }

@@ -16,7 +16,11 @@
 package be.rvponp.build;
 
 import be.rvponp.build.components.CompareButton;
+import be.rvponp.build.components.MessageLayout;
 import be.rvponp.build.components.RefreshButton;
+import com.vaadin.addon.tableexport.ExcelExport;
+import com.vaadin.annotations.Theme;
+import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.*;
 
@@ -26,6 +30,7 @@ import java.util.Date;
  * The Application's "main" class
  */
 @SuppressWarnings("serial")
+@Theme("mytheme")
 public class CommitViewerUI extends UI
 {
 
@@ -37,6 +42,8 @@ public class CommitViewerUI extends UI
     @Override
     protected void init(VaadinRequest vaadinRequest)
     {
+
+
         VerticalLayout layout = new VerticalLayout();
         FormLayout formLayout = new FormLayout();
         fromVersion = new ComboBox("From release");
@@ -47,8 +54,9 @@ public class CommitViewerUI extends UI
         table = new Table("Commits");
         table.addContainerProperty("Revision", Button.class, 0L);
         table.addContainerProperty("Date", Date.class, new Date());
-        table.addContainerProperty("Message", HorizontalLayout.class, "Message");
-        table.addContainerProperty("Author", String.class, "Author");
+        table.addContainerProperty("Message", MessageLayout.class, "Message");
+        table.addContainerProperty("Jira Assignee(s)", HorizontalLayout.class, "JiraAssignees");
+        table.addContainerProperty("Committer", Label.class, "Committer");
         table.addContainerProperty("# Files", Integer.class, 0);
         //Object[] columns = new Object[]{"Revision", "Date","Jiras","Message", "Author","# Files"};
         //table.setVisibleColumns(columns);
@@ -63,8 +71,24 @@ public class CommitViewerUI extends UI
         layout.addComponent(table);
         layout.addComponent(files);
 
+        Button exportToXLS = new Button("Export XLS");
+        exportToXLS.setIcon(new ThemeResource("img/table.png"));
+        layout.addComponent(exportToXLS);
 
         setContent(layout);
+
+        exportToXLS.addClickListener(new Button.ClickListener() {
+            private ExcelExport excelExport;
+
+            @Override
+            public void buttonClick(Button.ClickEvent clickEvent) {
+                excelExport = new ExcelExport(table);
+                excelExport.excludeCollapsedColumns();
+                excelExport.setReportTitle("CommitViewer Report - from " + fromVersion.getValue() + " to " + toVersion.getValue());
+                excelExport.export();
+
+            }
+        });
     }
 
     public void cleanComponents() {

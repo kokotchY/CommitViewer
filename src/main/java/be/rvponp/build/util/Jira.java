@@ -3,16 +3,14 @@ package be.rvponp.build.util;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
-import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
 
+
+import com.atlassian.jira.rpc.exception.RemoteAuthenticationException;
 import com.atlassian.jira.rpc.exception.RemotePermissionException;
 import com.atlassian.jira.rpc.soap.beans.RemoteIssue;
-import com.atlassian.jira.rpc.soap.beans.RemoteStatus;
 import com.atlassian.jira.rpc.soap.beans.RemoteVersion;
 
-import jira.rpc.soap.jirasoapservice_v2.JiraSoapService;
 
 
 public class Jira {
@@ -21,8 +19,7 @@ public class Jira {
     //private static final String SOAP_URL = "http://lts-jira01:8080/rpc/soap/jirasoapservice-v2";
 	private static final String LOGIN_NAME = "vermb";
 	private static final String LOGIN_PWD = "vermb";
-	//private static final int MAX_RESULT_LIMIT = 200;
-	//private static final String PROJECT = "PRODUCTION";
+
 	private static SOAPSession jiraWebService = null;
 
     private Jira()
@@ -48,32 +45,41 @@ public class Jira {
     }
 
     public static JiraEntry getJiraById(String id){
+        JiraEntry jiraEntry = new JiraEntry();
+        jiraEntry.setId(id);
         try {
-            JiraEntry jiraEntry = new JiraEntry();
-
             RemoteIssue remoteIssue = getJiraWebService().getJiraSoapService().getIssue(getJiraWebService().getAuthenticationToken(), id.trim());
             RemoteVersion[] version = remoteIssue.getFixVersions();
             String fixVersions = "";
             for(RemoteVersion v : version){
                 fixVersions += v.getName()+" ";
             }
-            String status = JiraStatus.values()[Integer.valueOf(remoteIssue.getStatus())].toString();
 
-
-
-
-            jiraEntry.setId(id);
-            jiraEntry.setStatus(status);
+            jiraEntry.setStatus(JiraStatus.values()[Integer.valueOf(remoteIssue.getStatus())]);
             jiraEntry.setFixVersion(fixVersions);
+            jiraEntry.setAssignee(remoteIssue.getAssignee());
 
-            return jiraEntry;
+        } catch (RemoteAuthenticationException m){
+            new Jira(); //Probably disconnected, try to reconnect
+            System.out.println("Probably disconnected. Try to reconnect.");
+            return getJiraById(id);
         } catch (RemotePermissionException r){
-            //Nothing to do, jira not found
+            jiraEntry.setValid(false); //No permission or no valid
         } catch (RemoteException e) {
-            e.printStackTrace();
+            jiraEntry.setValid(false); //Something else
         }
 
-        return null;
+        return jiraEntry;
+    }
+
+    public static List<JiraEntry> getJiraByIds(List<String> ids){
+        List<JiraEntry> results = new LinkedList<JiraEntry>();
+
+        for(String id : ids){
+            results.add(getJiraById(id));
+        }
+
+        return results;
     }
 
 //	public Version getCurrentVersion()
@@ -102,15 +108,6 @@ public class Jira {
 //	}
 
 
-
-
-
-
-
-
-
-
-
 //	private List<Issue> getIssuesAttachedToAVersion(Version version, boolean isResolved)
 //	{
 //		RemoteIssue[] returnedFilter;
@@ -130,7 +127,6 @@ public class Jira {
 //			}
 //
 //		} catch (RemoteException e) {
-//			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
 //
@@ -140,16 +136,41 @@ public class Jira {
 
     public static void main(String[] args) throws MalformedURLException, RemoteException {
 
-        System.out.println(getJiraById("TELEOPE-144").getStatus());
+       // http://athena/personnel/perk001.jsp?idUser=vermb
 
-        String str = "PRODUCTION-5456 : Pegaos Interface : 3rd party recuperation should be ventilated on standatrd rights only. PRODUCTION-5452 Taking standard rights only for third party ventilation.";
+//        URL url = new URL("http://athena/personnel/perk001.jsp?idUser=vermb");
+//        BufferedReader in = null;
+//        try {
+//            in = new BufferedReader(
+//                    new InputStreamReader(url.openStream()));
+//        } catch (IOException e) {
+//            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+//        }
+//
+//        String inputLine;
+//        StringBuilder response = new StringBuilder();
+//        try {
+//            while ((inputLine = in.readLine()) != null)
+//            {
+//                response.append(inputLine);
+//                //System.out.println(inputLine);
+//               // in.close();
+//            }
+//
+//
+//            Pattern pattern = Pattern.compile("<h3>(.*?)<img.*alt=\"(.*)\".*</h3>");
+//            Matcher matcher = pattern.matcher(response);
+//            while(matcher.find()){
+//                System.out.println(matcher.group(0));
+//                System.out.println(matcher.group(1));
+//                System.out.println(matcher.group(2));
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+//        }
 
 
-         Pattern pattern = Pattern.compile("([A-Z]+-[0-9]+)");
-         Matcher matcher = pattern.matcher(str);
-
-
-         System.out.println(str.replaceAll("([A-Z]+-[0-9]+)","{TOKEN}"));
+        System.out.println(ADUserResolver.getFullUsernameByID("can"));
 
 
     }
