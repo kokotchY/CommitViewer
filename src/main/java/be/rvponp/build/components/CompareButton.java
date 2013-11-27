@@ -1,6 +1,20 @@
 package be.rvponp.build.components;
 
+import be.rvponp.build.util.ADUserResolver;
+import be.rvponp.build.util.JiraEntry;
 import be.rvponp.build.util.JiraLinkCommitParser;
+import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.VerticalLayout;
+import be.rvponp.build.util.JiraStatus;
+import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FileResource;
+import com.vaadin.server.ThemeResource;
+import com.vaadin.server.VaadinService;
 import be.rvponp.build.util.Util;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
@@ -29,6 +43,7 @@ import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -51,6 +66,7 @@ public class CompareButton extends Button implements Button.ClickListener {
     private final Table table;
     private final VerticalLayout files;
     private final ListSelect filterJira;
+    private final String pathIcon = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();    
 
     public CompareButton(ComboBox fromVersion, ComboBox toVersion, Table table, VerticalLayout files, ListSelect filterJira) {
         super("Compare");
@@ -60,6 +76,7 @@ public class CompareButton extends Button implements Button.ClickListener {
         this.files = files;
         this.filterJira = filterJira;
         addClickListener(this);
+        this.setIcon(new ThemeResource("img/view.png"));
     }
 
 
@@ -95,12 +112,12 @@ public class CompareButton extends Button implements Button.ClickListener {
                 for (Object o : log) {
                     SVNLogEntry entry = (SVNLogEntry) o;
                     int nbFiles = getNumberFiles(entry);
-                    Label message = new Label(JiraLinkCommitParser.parseJiraLink(entry.getMessage()));
-                    message.setContentMode(ContentMode.HTML);
+                    //message.setContentMode(ContentMode.HTML);
                     long revision = entry.getRevision();
                     RevisionButton buttonRevision = new RevisionButton(revision, entry.getChangedPaths(), files);
                     buttonRevision.setStyleName(BaseTheme.BUTTON_LINK);
-                    table.addItem(new Object[]{buttonRevision, entry.getDate(), entry.getAuthor(), message, nbFiles}, index++);
+                    table.addItem(new Object[]{buttonRevision, entry.getDate(), new MessageLayout(entry.getMessage())/*generateJiraButtonWithMessage(entry.getMessage())*/, new JiraAssigneesLayout(JiraLinkCommitParser.parseJiraIdentifier(entry.getMessage())), new Label(ADUserResolver.getFullUsernameByID(entry.getAuthor())), nbFiles}, index++);
+                    //table.addGeneratedColumn("Jiras",new MessageColumnGenerator(JiraLinkCommitParser.parseJiraIdentifier(entry.getMessage())));
                 }
             } catch (SVNException e) {
                 e.printStackTrace();
@@ -136,8 +153,9 @@ public class CompareButton extends Button implements Button.ClickListener {
                     SVNProperties revisionProperties = repository.getRevisionProperties(revision, null);
                     String dateRevision = revisionProperties.getStringValue(SVNRevisionProperty.DATE);
                     SimpleDateFormat revisionFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS");
-                    DateTime dateTime = new DateTime(revisionFormat.parse(dateRevision));
-                    if (dateTime.isBefore(new DateTime(date))) {
+                    DateTime dateTime1 = new DateTime(revisionFormat.parse(dateRevision)).withFieldAdded(DurationFieldType.hours(), 2);
+                    if (dateTime1.isBefore(new DateTime(date))) {
+                        System.out.println(dateTime1+" is before "+date);
                         return revision+1;
                     } else {
                         return revision;

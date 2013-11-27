@@ -16,7 +16,12 @@
 package be.rvponp.build;
 
 import be.rvponp.build.components.CompareButton;
+import be.rvponp.build.components.MessageLayout;
 import be.rvponp.build.components.RefreshButton;
+import com.vaadin.addon.tableexport.ExcelExport;
+import com.vaadin.annotations.Theme;
+import com.vaadin.server.ThemeResource;
+import be.rvponp.build.util.ReleaseUtil;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
@@ -33,12 +38,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Date;
+import java.util.List;
 
 /**
  * The Application's "main" class
  */
 @SuppressWarnings("serial")
-public class CommitViewerUI extends UI {
+@Theme("mytheme")
+public class CommitViewerUI extends UI
+{
 
     private ComboBox fromVersion;
     private ComboBox toVersion;
@@ -47,7 +55,8 @@ public class CommitViewerUI extends UI {
     private VerticalLayout files;
 
     @Override
-    protected void init(VaadinRequest vaadinRequest) {
+    protected void init(VaadinRequest vaadinRequest)
+    {
         VerticalLayout layout = new VerticalLayout();
         Label labelBuildDate = new Label("Build date: " + getBuildDate());
         layout.addComponent(labelBuildDate);
@@ -69,9 +78,12 @@ public class CommitViewerUI extends UI {
         table = new Table("Commits");
         table.addContainerProperty("Revision", Button.class, 0L);
         table.addContainerProperty("Date", Date.class, new Date());
-        table.addContainerProperty("Author", String.class, "Author");
-        table.addContainerProperty("Message", Label.class, "Message");
+        table.addContainerProperty("Message", MessageLayout.class, "Message");
+        table.addContainerProperty("Jira Assignee(s)", HorizontalLayout.class, "JiraAssignees");
+        table.addContainerProperty("Committer", Label.class, "Committer");
         table.addContainerProperty("# Files", Integer.class, 0);
+        //Object[] columns = new Object[]{"Revision", "Date","Jiras","Message", "Author","# Files"};
+        //table.setVisibleColumns(columns);
 
         table.setSizeFull();
         files = new VerticalLayout();
@@ -84,7 +96,24 @@ public class CommitViewerUI extends UI {
         layout.addComponent(new Label("Files"));
         layout.addComponent(files);
 
+        Button exportToXLS = new Button("Export XLS");
+        exportToXLS.setIcon(new ThemeResource("img/table.png"));
+        layout.addComponent(exportToXLS);
+
         setContent(layout);
+
+        exportToXLS.addClickListener(new Button.ClickListener() {
+            private ExcelExport excelExport;
+
+            @Override
+            public void buttonClick(Button.ClickEvent clickEvent) {
+                excelExport = new ExcelExport(table);
+                excelExport.excludeCollapsedColumns();
+                excelExport.setReportTitle("CommitViewer Report - from " + fromVersion.getValue() + " to " + toVersion.getValue());
+                excelExport.export();
+
+            }
+        });        
     }
 
     private String getBuildDate() {
@@ -108,7 +137,7 @@ public class CommitViewerUI extends UI {
             }
         }
         return "Unknown";
-    }
+    }    
 
     public void cleanComponents() {
         fromVersion.removeAllItems();

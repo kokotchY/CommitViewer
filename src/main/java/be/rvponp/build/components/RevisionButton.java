@@ -88,4 +88,8 @@ public class RevisionButton extends Button implements Button.ClickListener {
     private static String getParam(long revision) {
         return "?r1=" + (revision - 1) + "&r2=" + revision;
     }
+
+    public String toString(){
+        return Long.toString(revision);
+    }
 }
