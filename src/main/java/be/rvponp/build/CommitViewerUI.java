@@ -21,14 +21,13 @@ import be.rvponp.build.components.RefreshButton;
 import com.vaadin.addon.tableexport.ExcelExport;
 import com.vaadin.annotations.Theme;
 import com.vaadin.server.ThemeResource;
-import be.rvponp.build.util.ReleaseUtil;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -38,7 +37,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Date;
-import java.util.List;
 
 /**
  * The Application's "main" class

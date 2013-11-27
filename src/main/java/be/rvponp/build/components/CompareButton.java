@@ -1,25 +1,12 @@
 package be.rvponp.build.components;
 
 import be.rvponp.build.util.ADUserResolver;
-import be.rvponp.build.util.JiraEntry;
 import be.rvponp.build.util.JiraLinkCommitParser;
-import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.VerticalLayout;
-import be.rvponp.build.util.JiraStatus;
-import com.vaadin.server.ExternalResource;
-import com.vaadin.server.FileResource;
+import be.rvponp.build.util.Util;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinService;
-import be.rvponp.build.util.Util;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.Notification;
@@ -43,13 +30,11 @@ import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -66,7 +51,7 @@ public class CompareButton extends Button implements Button.ClickListener {
     private final Table table;
     private final VerticalLayout files;
     private final ListSelect filterJira;
-    private final String pathIcon = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();    
+    private final String pathIcon = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
 
     public CompareButton(ComboBox fromVersion, ComboBox toVersion, Table table, VerticalLayout files, ListSelect filterJira) {
         super("Compare");
@@ -96,14 +81,14 @@ public class CompareButton extends Button implements Button.ClickListener {
         table.removeAllItems();
         files.removeAllComponents();
         long startRevision = getRevision(repository, fromVersion.getValue());
-        System.out.println("Start revision: "+startRevision);
+        System.out.println("Start revision: " + startRevision);
         long endRevision;
         if (toVersion.getValue() == null) {
             endRevision = -1;
         } else {
             endRevision = getRevision(repository, toVersion.getValue());
         }
-        System.out.println("End revision: "+endRevision);
+        System.out.println("End revision: " + endRevision);
 
         if (startRevision != 0L && endRevision != 0L) {
             try {
@@ -155,8 +140,8 @@ public class CompareButton extends Button implements Button.ClickListener {
                     SimpleDateFormat revisionFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS");
                     DateTime dateTime1 = new DateTime(revisionFormat.parse(dateRevision)).withFieldAdded(DurationFieldType.hours(), 2);
                     if (dateTime1.isBefore(new DateTime(date))) {
-                        System.out.println(dateTime1+" is before "+date);
-                        return revision+1;
+                        System.out.println(dateTime1 + " is before " + date);
+                        return revision + 1;
                     } else {
                         return revision;
                     }
