@@ -7,7 +7,6 @@ import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Link;
 
 /**
- * Created with IntelliJ IDEA.
  * User: vermb
  * Date: 8/8/13
  * Time: 10:31 AM
@@ -30,21 +29,28 @@ public class JiraLink extends Link {
 
     private ThemeResource createJiraStatusImage(JiraStatus status) {
         String imageName = "";
-        if(status == JiraStatus.Open)
-            imageName = "status_open";
-        else if (status == JiraStatus.InProgress)
-            imageName = "status_inprogress";
-        else if (status == JiraStatus.Closed)
-            imageName = "status_closed";
-        else if (status == JiraStatus.Reopened)
-            imageName = "status_reopened";
-        else if (status == JiraStatus.Resolved)
-            imageName = "status_resolved";
+        switch (status) {
+            case Open:
+                imageName = "status_open";
+                break;
+            case InProgress:
+                imageName = "status_inprogress";
+                break;
+            case Closed:
+                imageName = "status_closed";
+                break;
+            case Reopened:
+                imageName = "status_reopened";
+                break;
+            case Resolved:
+                imageName = "status_resolved";
+                break;
+        }
 
         return (new ThemeResource("img/"+imageName+".gif"));
     }
 
     public String toString(){
-        return jiraEntry.JIRA_LINK+jiraEntry.getId()+" ("+jiraEntry.getStatus()+")";
+        return JiraEntry.JIRA_LINK +jiraEntry.getId()+" ("+jiraEntry.getStatus()+")";
     }
 }

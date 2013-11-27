@@ -10,7 +10,6 @@ import java.util.Hashtable;
 import java.util.Properties;
 
 /**
- * Created with IntelliJ IDEA.
  * User: vermb
  * Date: 8/7/13
  * Time: 10:29 AM
@@ -26,7 +25,7 @@ public class ADUserResolver {
 
     public static String getFullUsernameByID(String userid){
         String returnedValue="";
-        Hashtable env = new Hashtable();
+        Hashtable<String, String> env = new Hashtable<String, String>();
         Properties configFile = new Properties();
 
         try {
@@ -46,10 +45,10 @@ public class ADUserResolver {
 
             Attributes matchAttrs = new BasicAttributes(true);
             matchAttrs.put(new BasicAttribute("mailNickname", userid));
-            NamingEnumeration answer = ctx.search("OU=Users,OU=Accounts,OU=RVP-ONP,DC=onprvp,DC=fgov,DC=be", matchAttrs);
+            NamingEnumeration<SearchResult> answer = ctx.search("OU=Users,OU=Accounts,OU=RVP-ONP,DC=onprvp,DC=fgov,DC=be", matchAttrs);
 
             while (answer.hasMore()) {
-                SearchResult sr = (SearchResult)answer.next();
+                SearchResult sr = answer.next();
                 returnedValue = sr.getName().replace("CN=","");
             }
             ctx.close();

@@ -3,7 +3,6 @@ package be.rvponp.build.util;
 import org.apache.commons.io.FilenameUtils;
 
 /**
- * Created with IntelliJ IDEA.
  * User: canas
  * Date: 8/2/13
  * Time: 4:27 PM

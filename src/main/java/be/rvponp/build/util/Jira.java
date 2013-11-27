@@ -11,8 +11,6 @@ import com.atlassian.jira.rpc.exception.RemotePermissionException;
 import com.atlassian.jira.rpc.soap.beans.RemoteIssue;
 import com.atlassian.jira.rpc.soap.beans.RemoteVersion;
 
-
-
 public class Jira {
 	
 	private static final String SOAP_URL = "http://jira:8080/rpc/soap/jirasoapservice-v2";
@@ -80,7 +78,7 @@ public class Jira {
     }
 
     public static List<JiraEntry> getJiraByIds(List<String> ids, Boolean parsingJira){
-        List<JiraEntry> results = new LinkedList<JiraEntry>();
+        List<JiraEntry> results = new ArrayList<JiraEntry>();
 
         for(String id : ids){
             results.add(getJiraById(id, parsingJira));

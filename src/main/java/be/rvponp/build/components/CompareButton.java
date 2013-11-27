@@ -39,7 +39,6 @@ import java.util.Date;
 import java.util.Properties;
 
 /**
- * Created with IntelliJ IDEA.
  * User: canas
  * Date: 7/10/13
  * Time: 10:00 AM

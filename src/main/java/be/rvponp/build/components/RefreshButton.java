@@ -3,17 +3,13 @@ package be.rvponp.build.components;
 import be.rvponp.build.CommitViewerUI;
 import be.rvponp.build.Release;
 import be.rvponp.build.util.ReleaseUtil;
-import com.vaadin.server.FileResource;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.server.VaadinService;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 
-import java.io.File;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
  * User: canas
  * Date: 7/11/13
  * Time: 10:23 AM
@@ -31,7 +27,6 @@ public class RefreshButton extends Button implements Button.ClickListener {
         this.fromVersion = fromVersion;
         this.toVersion = toVersion;
         this.ui = ui;
-        String path = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
         this.setIcon(new ThemeResource("img/refresh.png"));
     }
 

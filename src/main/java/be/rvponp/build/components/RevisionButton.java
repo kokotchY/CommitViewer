@@ -11,13 +11,11 @@ import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.VerticalLayout;
-import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
  * User: canas
  * Date: 7/10/13
  * Time: 2:52 PM

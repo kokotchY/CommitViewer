@@ -19,7 +19,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created with IntelliJ IDEA.
  * User: canas
  * Date: 7/11/13
  * Time: 10:17 AM

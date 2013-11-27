@@ -1,7 +1,6 @@
 package be.rvponp.build.util;
 
 /**
- * Created with IntelliJ IDEA.
  * User: vermb
  * Date: 7/30/13
  * Time: 2:06 PM

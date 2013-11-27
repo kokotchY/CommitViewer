@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
  * User: canas
  * Date: 7/11/13
  * Time: 10:02 AM

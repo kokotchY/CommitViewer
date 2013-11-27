@@ -9,7 +9,6 @@ import com.vaadin.ui.Label;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
  * User: vermb
  * Date: 8/8/13
  * Time: 10:48 AM
@@ -24,8 +23,6 @@ public class JiraAssigneesLayout extends HorizontalLayout{
     }
 
     private void generateJiraAssignee(List<JiraEntry> jiraIds) {
-
-
         if(!jiraIds.isEmpty())
         {
             for(JiraEntry s : jiraIds){
