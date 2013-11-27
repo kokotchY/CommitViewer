@@ -20,6 +20,7 @@ import be.rvponp.build.components.MessageLayout;
 import be.rvponp.build.components.RefreshButton;
 import com.vaadin.addon.tableexport.ExcelExport;
 import com.vaadin.annotations.Theme;
+import com.vaadin.annotations.Title;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
@@ -44,6 +45,7 @@ import java.util.Date;
  */
 @SuppressWarnings("serial")
 @Theme("mytheme")
+@Title("Commit Viewer")
 public class CommitViewerUI extends UI
 {
 
