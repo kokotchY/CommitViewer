@@ -102,7 +102,7 @@
           <systemProperties>
             <systemProperty>
                     <name>cv.config</name>
-                    <value>/home/vermb/Desktop/CommitViewer.properties</value>
+                    <value>/home/canas/Development/sources/theseos/tools/build/CommitViewer/src/main/resources/be/rvponp/build/CommitViewer.properties</value>
              </systemProperty>
           </systemProperties>
         </configuration>

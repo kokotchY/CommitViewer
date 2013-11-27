@@ -23,6 +23,7 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
@@ -85,10 +86,12 @@ public class CommitViewerUI extends UI
 
         table.setSizeFull();
         files = new VerticalLayout();
-        formLayout.addComponent(new CompareButton(fromVersion, toVersion, table, files, filterJira));
+        CheckBox jiraParsing = new CheckBox("Jira Parsing");
+        formLayout.addComponent(new CompareButton(fromVersion, toVersion, table, files, filterJira, jiraParsing));
         RefreshButton refreshButton = new RefreshButton(this, fromVersion, toVersion);
         refreshButton.buttonClick(null);
         formLayout.addComponent(refreshButton);
+        formLayout.addComponent(jiraParsing);
         layout.addComponent(formLayout);
         layout.addComponent(table);
         layout.addComponent(new Label("Files"));

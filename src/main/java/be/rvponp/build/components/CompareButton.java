@@ -6,6 +6,7 @@ import be.rvponp.build.util.Util;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinService;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
@@ -52,8 +53,9 @@ public class CompareButton extends Button implements Button.ClickListener {
     private final VerticalLayout files;
     private final ListSelect filterJira;
     private final String pathIcon = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
+    private final CheckBox jiraParsing;
 
-    public CompareButton(ComboBox fromVersion, ComboBox toVersion, Table table, VerticalLayout files, ListSelect filterJira) {
+    public CompareButton(ComboBox fromVersion, ComboBox toVersion, Table table, VerticalLayout files, ListSelect filterJira, CheckBox jiraParsing) {
         super("Compare");
         this.fromVersion = fromVersion;
         this.toVersion = toVersion;
@@ -62,6 +64,7 @@ public class CompareButton extends Button implements Button.ClickListener {
         this.filterJira = filterJira;
         addClickListener(this);
         this.setIcon(new ThemeResource("img/view.png"));
+        this.jiraParsing = jiraParsing;
     }
 
 
@@ -101,7 +104,12 @@ public class CompareButton extends Button implements Button.ClickListener {
                     long revision = entry.getRevision();
                     RevisionButton buttonRevision = new RevisionButton(revision, entry.getChangedPaths(), files);
                     buttonRevision.setStyleName(BaseTheme.BUTTON_LINK);
-                    table.addItem(new Object[]{buttonRevision, entry.getDate(), new MessageLayout(entry.getMessage())/*generateJiraButtonWithMessage(entry.getMessage())*/, new JiraAssigneesLayout(JiraLinkCommitParser.parseJiraIdentifier(entry.getMessage())), new Label(ADUserResolver.getFullUsernameByID(entry.getAuthor())), nbFiles}, index++);
+                    table.addItem(new Object[]{buttonRevision, entry.getDate(), new MessageLayout(entry.getMessage(),
+                            jiraParsing.getValue()
+                            ), new JiraAssigneesLayout(JiraLinkCommitParser.parseJiraIdentifier(entry.getMessage(),
+                            jiraParsing.getValue())), new Label(ADUserResolver.getFullUsernameByID(entry.getAuthor())),
+                            nbFiles},
+                            index++);
                     //table.addGeneratedColumn("Jiras",new MessageColumnGenerator(JiraLinkCommitParser.parseJiraIdentifier(entry.getMessage())));
                 }
             } catch (SVNException e) {

@@ -25,7 +25,6 @@ public class Jira {
     private Jira()
     {
         try {
-
             jiraWebService = new SOAPSession(new URL(SOAP_URL));
             jiraWebService.connect(LOGIN_NAME, LOGIN_PWD);
         } catch (MalformedURLException e) {
@@ -44,39 +43,47 @@ public class Jira {
         return jiraWebService;
     }
 
-    public static JiraEntry getJiraById(String id){
+    public static JiraEntry getJiraById(String id, Boolean parsingJira){
         JiraEntry jiraEntry = new JiraEntry();
         jiraEntry.setId(id);
-        try {
-            RemoteIssue remoteIssue = getJiraWebService().getJiraSoapService().getIssue(getJiraWebService().getAuthenticationToken(), id.trim());
-            RemoteVersion[] version = remoteIssue.getFixVersions();
-            String fixVersions = "";
-            for(RemoteVersion v : version){
-                fixVersions += v.getName()+" ";
+        if (parsingJira) {
+            try {
+                RemoteIssue remoteIssue = getJiraWebService().getJiraSoapService().getIssue(getJiraWebService().getAuthenticationToken(), id.trim());
+                RemoteVersion[] version = remoteIssue.getFixVersions();
+                StringBuilder buffer = new StringBuilder();
+                for (RemoteVersion v : version) {
+                    buffer.append(v.getName()).append(" ");
+                }
+                String fixVersions = buffer.toString();
+
+                jiraEntry.setStatus(JiraStatus.values()[Integer.valueOf(remoteIssue.getStatus())]);
+                jiraEntry.setFixVersion(fixVersions);
+                jiraEntry.setAssignee(remoteIssue.getAssignee());
+
+            } catch (RemoteAuthenticationException m){
+                new Jira(); //Probably disconnected, try to reconnect
+                System.out.println("Probably disconnected. Try to reconnect.");
+                return getJiraById(id, parsingJira);
+            } catch (RemotePermissionException r){
+                jiraEntry.setValid(false); //No permission or no valid
+            } catch (RemoteException e) {
+                jiraEntry.setValid(false); //Something else
             }
-
-            jiraEntry.setStatus(JiraStatus.values()[Integer.valueOf(remoteIssue.getStatus())]);
-            jiraEntry.setFixVersion(fixVersions);
-            jiraEntry.setAssignee(remoteIssue.getAssignee());
-
-        } catch (RemoteAuthenticationException m){
-            new Jira(); //Probably disconnected, try to reconnect
-            System.out.println("Probably disconnected. Try to reconnect.");
-            return getJiraById(id);
-        } catch (RemotePermissionException r){
-            jiraEntry.setValid(false); //No permission or no valid
-        } catch (RemoteException e) {
-            jiraEntry.setValid(false); //Something else
+        } else {
+            jiraEntry.setStatus(JiraStatus.Undefined_A);
+            jiraEntry.setFixVersion("Unknown");
+            jiraEntry.setAssignee("Unknown");
+            jiraEntry.setValid(true);
         }
 
         return jiraEntry;
     }
 
-    public static List<JiraEntry> getJiraByIds(List<String> ids){
+    public static List<JiraEntry> getJiraByIds(List<String> ids, Boolean parsingJira){
         List<JiraEntry> results = new LinkedList<JiraEntry>();
 
         for(String id : ids){
-            results.add(getJiraById(id));
+            results.add(getJiraById(id, parsingJira));
         }
 
         return results;

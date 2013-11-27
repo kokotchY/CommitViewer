@@ -19,10 +19,12 @@ public class JiraLinkCommitParser {
 
     /**
      * Replace any jira identifier ([A-Z]+-[0-9]+) with a link to it
+     *
      * @param text String to parse
+     * @param parsingJira
      * @return New string with the jira identifier replaced with a link to it
      */
-    public static List<JiraEntry> parseJiraIdentifier(String text) {
+    public static List<JiraEntry> parseJiraIdentifier(String text, Boolean parsingJira) {
         Pattern pattern = Pattern.compile("([A-Z]+-[0-9]+)");
         Matcher matcher = pattern.matcher(text);
         List<String> matchResult = new ArrayList<String>();
@@ -30,7 +32,7 @@ public class JiraLinkCommitParser {
             matchResult.add(matcher.group());
         }
 
-        return Jira.getJiraByIds(matchResult);
+        return Jira.getJiraByIds(matchResult, parsingJira);
     }
 
 

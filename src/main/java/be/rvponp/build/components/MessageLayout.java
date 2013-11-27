@@ -22,13 +22,12 @@ import java.util.StringTokenizer;
 public class MessageLayout extends HorizontalLayout{
 
 
-    public MessageLayout(String message){
+    public MessageLayout(String message, Boolean parsingJira){
         super();
-        generateMessage(message);
-
+        generateMessage(message, parsingJira);
     }
 
-    private void generateMessage(String message){
+    private void generateMessage(String message, Boolean parsingJira){
 
         setSpacing(true);
 
@@ -36,7 +35,7 @@ public class MessageLayout extends HorizontalLayout{
         String messageWithoutJiraIds = message.replaceAll(PATTERN_JIRA, "§");
         StringTokenizer tokens = new StringTokenizer(messageWithoutJiraIds, "§", true);
 
-        List<JiraEntry> jiraIds = JiraLinkCommitParser.parseJiraIdentifier(message);
+        List<JiraEntry> jiraIds = JiraLinkCommitParser.parseJiraIdentifier(message, parsingJira);
 
         if(!jiraIds.isEmpty())
         {
