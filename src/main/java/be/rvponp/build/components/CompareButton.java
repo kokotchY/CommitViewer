@@ -68,7 +68,8 @@ public class CompareButton extends Button implements Button.ClickListener {
         DAVRepositoryFactory.setup();
         SVNRepository repository;
         try {
-            repository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded("http://lpr-therepo/svn/theseos/theseos/branches/theseos-13.03/"));
+            repository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded
+                    ("http://lpr-therepo/svn/theseos/theseos/branches/theseos-13.11/"));
         } catch (SVNException e) {
             e.printStackTrace();
             Notification.show("Impossible to access the repository", Notification.Type.ERROR_MESSAGE);
