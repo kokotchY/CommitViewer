@@ -6,25 +6,29 @@ import java.rmi.RemoteException;
 import java.util.*;
 
 
+import be.rvponp.build.CommitViewerConfiguration;
 import com.atlassian.jira.rpc.exception.RemoteAuthenticationException;
 import com.atlassian.jira.rpc.exception.RemotePermissionException;
+import com.atlassian.jira.rpc.soap.beans.RemoteCustomFieldValue;
 import com.atlassian.jira.rpc.soap.beans.RemoteIssue;
 import com.atlassian.jira.rpc.soap.beans.RemoteVersion;
+import org.apache.log4j.Logger;
 
 public class Jira {
 	
-	private static final String SOAP_URL = "http://jira:8080/rpc/soap/jirasoapservice-v2";
-    //private static final String SOAP_URL = "http://lts-jira01:8080/rpc/soap/jirasoapservice-v2";
-	private static final String LOGIN_NAME = "vermb";
-	private static final String LOGIN_PWD = "vermb";
-
-	private static SOAPSession jiraWebService = null;
+	private static final String KEY_SOAP_URL = "jira.url";
+	private static final String KEY_USER = "jira.user";
+	private static final String KEY_PASS = "jira.pass";
+    private static final CommitViewerConfiguration config = CommitViewerConfiguration.getInstance();
+    private static final String FIELD_RESOLVED_ON = "customfield_10200";
+    private static SOAPSession jiraWebService = null;
+    private static final Logger log = Logger.getLogger(Jira.class);
 
     private Jira()
     {
         try {
-            jiraWebService = new SOAPSession(new URL(SOAP_URL));
-            jiraWebService.connect(LOGIN_NAME, LOGIN_PWD);
+            jiraWebService = new SOAPSession(new URL(config.getProperty(KEY_SOAP_URL)));
+            jiraWebService.connect(config.getProperty(KEY_USER), config.getProperty(KEY_PASS));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (RemoteException e) {
@@ -35,7 +39,6 @@ public class Jira {
 
     private static SOAPSession getJiraWebService(){
         if(jiraWebService == null){
-            System.out.println("Connection");
             new Jira();
         }
         return jiraWebService;
@@ -45,10 +48,17 @@ public class Jira {
         JiraEntry jiraEntry = new JiraEntry();
         jiraEntry.setId(id);
         if (parsingJira) {
+            int connectionTry = 0;
             try {
                 RemoteIssue remoteIssue = getJiraWebService().getJiraSoapService().getIssue(getJiraWebService().getAuthenticationToken(), id.trim());
                 RemoteVersion[] version = remoteIssue.getFixVersions();
                 StringBuilder buffer = new StringBuilder();
+                for (RemoteCustomFieldValue field : remoteIssue.getCustomFieldValues()) {
+                    if (FIELD_RESOLVED_ON.equals(field.getCustomfieldId())) {
+                        jiraEntry.setResolvedOn(getCustomFieldValue(field));
+                    }
+                }
+
                 for (RemoteVersion v : version) {
                     buffer.append(v.getName()).append(" ");
                 }
@@ -57,24 +67,42 @@ public class Jira {
                 jiraEntry.setStatus(JiraStatus.values()[Integer.valueOf(remoteIssue.getStatus())]);
                 jiraEntry.setFixVersion(fixVersions);
                 jiraEntry.setAssignee(remoteIssue.getAssignee());
-
             } catch (RemoteAuthenticationException m){
-                new Jira(); //Probably disconnected, try to reconnect
-                System.out.println("Probably disconnected. Try to reconnect.");
-                return getJiraById(id, parsingJira);
+                log.warn("Probably disconnected. Try to reconnect.");
+                connectionTry++;
+                if (connectionTry < 3) {
+                    new Jira(); //Probably disconnected, try to reconnect
+                    return getJiraById(id, parsingJira);
+                } else {
+                    log.error("Impossible to reconnect, set unknown status to jiraEntry");
+                    setUnknownStatus(jiraEntry);
+                }
             } catch (RemotePermissionException r){
                 jiraEntry.setValid(false); //No permission or no valid
             } catch (RemoteException e) {
                 jiraEntry.setValid(false); //Something else
             }
         } else {
-            jiraEntry.setStatus(JiraStatus.Undefined_A);
-            jiraEntry.setFixVersion("Unknown");
-            jiraEntry.setAssignee("Unknown");
-            jiraEntry.setValid(true);
+            setUnknownStatus(jiraEntry);
         }
 
         return jiraEntry;
+    }
+
+    private static String getCustomFieldValue(RemoteCustomFieldValue field) {
+        StringBuilder builder = new StringBuilder("[");
+        for (String value : field.getValues()) {
+            builder.append(value).append(",");
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
+    private static void setUnknownStatus(JiraEntry jiraEntry) {
+        jiraEntry.setStatus(JiraStatus.Undefined_A);
+        jiraEntry.setFixVersion("Unknown");
+        jiraEntry.setAssignee("Unknown");
+        jiraEntry.setValid(true);
     }
 
     public static List<JiraEntry> getJiraByIds(List<String> ids, Boolean parsingJira){

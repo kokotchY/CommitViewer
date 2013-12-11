@@ -1,6 +1,7 @@
 package be.rvponp.build.components;
 
 import be.rvponp.build.util.ADUserResolver;
+import be.rvponp.build.util.JiraEntry;
 import be.rvponp.build.util.JiraLinkCommitParser;
 import be.rvponp.build.util.Util;
 import com.vaadin.server.ThemeResource;
@@ -37,6 +38,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -105,10 +107,18 @@ public class CompareButton extends Button implements Button.ClickListener {
                     long revision = entry.getRevision();
                     RevisionButton buttonRevision = new RevisionButton(revision, entry.getChangedPaths(), files);
                     buttonRevision.setStyleName(BaseTheme.BUTTON_LINK);
-                    table.addItem(new Object[]{buttonRevision, entry.getDate(), new MessageLayout(entry.getMessage(),
-                            jiraParsing.getValue()
-                            ), new JiraAssigneesLayout(JiraLinkCommitParser.parseJiraIdentifier(entry.getMessage(),
-                            jiraParsing.getValue())), new Label(ADUserResolver.getFullUsernameByID(entry.getAuthor())),
+                    List<JiraEntry> listJira = JiraLinkCommitParser.parseJiraIdentifier(entry.getMessage(), jiraParsing.getValue());
+                    StringBuilder resolvedOn = new StringBuilder();
+                    for (JiraEntry jiraEntry : listJira) {
+                        resolvedOn.append(jiraEntry.getResolvedOn());
+                    }
+                    table.addItem(new Object[]{
+                            buttonRevision,
+                            entry.getDate(),
+                            new MessageLayout(entry.getMessage(), jiraParsing.getValue()),
+                            new Label(resolvedOn.toString()),
+                            new JiraAssigneesLayout(listJira),
+                            new Label(ADUserResolver.getFullUsernameByID(entry.getAuthor())),
                             nbFiles},
                             index++);
                     //table.addGeneratedColumn("Jiras",new MessageColumnGenerator(JiraLinkCommitParser.parseJiraIdentifier(entry.getMessage())));

@@ -1,5 +1,8 @@
 package be.rvponp.build.util;
 
+import be.rvponp.build.CommitViewerConfiguration;
+import org.apache.log4j.Logger;
+
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.directory.*;
@@ -17,28 +20,23 @@ import java.util.Properties;
  */
 public class ADUserResolver {
 
-    private static final String SYSTEM_PROPERTY_NAME = "cv.config";
+
     private static final String AD_URL = "ad.url";
     private static final String AD_USER = "ad.user";
     private static final String AD_PWD = "ad.pwd";
     private static final String AD_DOMAIN = "ad.domain";
+    private static final CommitViewerConfiguration config = CommitViewerConfiguration.getInstance();
+    private static final Logger log = Logger.getLogger(ADUserResolver.class);
+
 
     public static String getFullUsernameByID(String userid){
         String returnedValue="";
         Hashtable<String, String> env = new Hashtable<String, String>();
-        Properties configFile = new Properties();
-
-        try {
-            configFile.load(new FileInputStream(new File(System.getProperty(SYSTEM_PROPERTY_NAME))));
-        } catch (IOException e) {
-            System.err.println("Looking for "+SYSTEM_PROPERTY_NAME+"  property. File not found.");
-            e.printStackTrace();
-        }
 
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-        env.put(Context.PROVIDER_URL, configFile.getProperty(AD_URL));
-        env.put(Context.SECURITY_PRINCIPAL, configFile.getProperty(AD_USER)+'@'+ configFile.getProperty(AD_DOMAIN));
-        env.put(Context.SECURITY_CREDENTIALS, configFile.getProperty(AD_PWD));
+        env.put(Context.PROVIDER_URL, config.getProperty(AD_URL));
+        env.put(Context.SECURITY_PRINCIPAL, config.getProperty(AD_USER)+'@'+ config.getProperty(AD_DOMAIN));
+        env.put(Context.SECURITY_CREDENTIALS, config.getProperty(AD_PWD));
         env.put(Context.REFERRAL, "follow");
         try {
             DirContext ctx = new InitialDirContext(env);
@@ -58,5 +56,4 @@ public class ADUserResolver {
 
         return returnedValue;
     }
-
 }

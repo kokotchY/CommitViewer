@@ -80,6 +80,7 @@ public class CommitViewerUI extends UI
         table.addContainerProperty("Revision", Button.class, 0L);
         table.addContainerProperty("Date", Date.class, new Date());
         table.addContainerProperty("Message", MessageLayout.class, "Message");
+        table.addContainerProperty("Resolved On", Label.class, "");
         table.addContainerProperty("Jira Assignee(s)", HorizontalLayout.class, "JiraAssignees");
         table.addContainerProperty("Committer", Label.class, "Committer");
         table.addContainerProperty("# Files", Integer.class, 0);
@@ -89,9 +90,12 @@ public class CommitViewerUI extends UI
         table.setSizeFull();
         files = new VerticalLayout();
         CheckBox jiraParsing = new CheckBox("Jira Parsing");
-        formLayout.addComponent(new CompareButton(fromVersion, toVersion, table, files, filterJira, jiraParsing));
+        jiraParsing.setValue(true);
+        CompareButton compareButton = new CompareButton(fromVersion, toVersion, table, files, filterJira, jiraParsing);
+        formLayout.addComponent(compareButton);
         RefreshButton refreshButton = new RefreshButton(this, fromVersion, toVersion);
         refreshButton.buttonClick(null);
+        compareButton.buttonClick(null);
         formLayout.addComponent(refreshButton);
         formLayout.addComponent(jiraParsing);
         layout.addComponent(formLayout);

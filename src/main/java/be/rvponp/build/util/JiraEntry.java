@@ -15,20 +15,23 @@ public class JiraEntry {
     private String assignee;
     private boolean valid;
     private String externalLink;
+    private String resolvedOn;
 
-    public JiraEntry(String id, JiraStatus status, String fixVersion){
+    public JiraEntry(String id, JiraStatus status, String fixVersion) {
         this.id = id;
         this.status = status;
         this.fixVersion = fixVersion;
-        valid=true;
+        this.valid = true;
+        this.resolvedOn = "";
     }
 
-    public JiraEntry(){
-        id="";
+    public JiraEntry() {
+        id = "";
         status = JiraStatus.Undefined_A;
-        fixVersion="";
-        assignee="";
-        valid=true;
+        fixVersion = "";
+        assignee = "";
+        valid = true;
+        this.resolvedOn = "";
     }
 
     public String getId() {
@@ -47,7 +50,7 @@ public class JiraEntry {
         this.status = status;
     }
 
-    public void setStatus(String status){
+    public void setStatus(String status) {
         this.status = JiraStatus.valueOf(status);
     }
 
@@ -59,7 +62,7 @@ public class JiraEntry {
         this.fixVersion = fixVersion;
     }
 
-    public String toString(){
+    public String toString() {
         return id;
     }
 
@@ -81,10 +84,18 @@ public class JiraEntry {
     }
 
     public String getExternalLink() {
-        return JIRA_LINK+getId();
+        return JIRA_LINK + getId();
     }
 
     public void setExternalLink(String externalLink) {
         this.externalLink = externalLink;
+    }
+
+    public void setResolvedOn(String resolvedOn) {
+        this.resolvedOn = resolvedOn;
+    }
+
+    public String getResolvedOn() {
+        return resolvedOn;
     }
 }
