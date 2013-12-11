@@ -9,13 +9,6 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Properties;
 
-/**
- * Created with IntelliJ IDEA.
- * User: vermb
- * Date: 8/7/13
- * Time: 10:29 AM
- * To change this template use File | Settings | File Templates.
- */
 public class ADUserResolver {
 
     private static final String SYSTEM_PROPERTY_NAME = "cv.config";
@@ -25,7 +18,7 @@ public class ADUserResolver {
     private static final String AD_DOMAIN = "ad.domain";
 
     public static String getFullUsernameByID(String userid){
-        String returnedValue="";
+        String returnedValue=userid;
         Hashtable env = new Hashtable();
         Properties configFile = new Properties();
 
