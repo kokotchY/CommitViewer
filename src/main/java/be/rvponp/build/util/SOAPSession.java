@@ -8,6 +8,8 @@ import com.atlassian.jira.rpc.exception.RemoteAuthenticationException;
 import jira.rpc.soap.jirasoapservice_v2.JiraSoapService;
 import jira.rpc.soap.jirasoapservice_v2.JiraSoapServiceService;
 import jira.rpc.soap.jirasoapservice_v2.JiraSoapServiceServiceLocator;
+import org.apache.log4j.Logger;
+
 /**
  * This represents a SOAP session with JIRA including that state of being logged in or not
  */
@@ -16,6 +18,8 @@ public class SOAPSession
     private JiraSoapServiceService jiraSoapServiceLocator;
     private JiraSoapService jiraSoapService;
     private String token;
+    private static final Logger log = Logger.getLogger(SOAPSession.class);
+
     public SOAPSession(URL webServicePort)
     {
         jiraSoapServiceLocator = new JiraSoapServiceServiceLocator();
@@ -28,7 +32,7 @@ public class SOAPSession
             else
             {
                 jiraSoapService = jiraSoapServiceLocator.getJirasoapserviceV2(webServicePort);
-                System.out.println("SOAP Session service endpoint at " + webServicePort.toExternalForm());
+                log.info("SOAP Session service endpoint at " + webServicePort.toExternalForm());
             }
         }
         catch (ServiceException e)
@@ -41,9 +45,9 @@ public class SOAPSession
         this(null);
     }
     public void connect(String userName, String password) throws RemoteException {
-        System.out.println("\tConnnecting via SOAP as : " + userName);
+        log.info("\tConnnecting via SOAP as : " + userName);
         token = getJiraSoapService().login(userName, password);
-        System.out.println("\tConnected");
+        log.info("\tConnected");
     }
     public String getAuthenticationToken()
     {

@@ -20,6 +20,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DurationFieldType;
 import org.tmatesoft.svn.core.SVNException;
@@ -53,6 +54,7 @@ public class CompareButton extends Button implements Button.ClickListener {
     private final ListSelect filterJira;
     private final String pathIcon = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
     private final CheckBox jiraParsing;
+    private static final Logger log = Logger.getLogger(CompareButton.class);
 
     public CompareButton(ComboBox fromVersion, ComboBox toVersion, Table table, VerticalLayout files, ListSelect filterJira, CheckBox jiraParsing) {
         super("Compare");
@@ -83,14 +85,14 @@ public class CompareButton extends Button implements Button.ClickListener {
         table.removeAllItems();
         files.removeAllComponents();
         long startRevision = getRevision(repository, fromVersion.getValue());
-        System.out.println("Start revision: " + startRevision);
+        log.debug("Start revision: " + startRevision);
         long endRevision;
         if (toVersion.getValue() == null) {
             endRevision = -1;
         } else {
             endRevision = getRevision(repository, toVersion.getValue());
         }
-        System.out.println("End revision: " + endRevision);
+        log.debug("End revision: " + endRevision);
 
         if (startRevision != 0L && endRevision != 0L) {
             try {
@@ -147,7 +149,7 @@ public class CompareButton extends Button implements Button.ClickListener {
                     SimpleDateFormat revisionFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS");
                     DateTime dateTime1 = new DateTime(revisionFormat.parse(dateRevision)).withFieldAdded(DurationFieldType.hours(), 2);
                     if (dateTime1.isBefore(new DateTime(date))) {
-                        System.out.println(dateTime1 + " is before " + date);
+                        log.debug(dateTime1 + " is before " + date);
                         return revision + 1;
                     } else {
                         return revision;

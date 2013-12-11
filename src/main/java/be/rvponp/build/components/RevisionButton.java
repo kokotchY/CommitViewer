@@ -11,6 +11,7 @@ import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.VerticalLayout;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.util.Map;
@@ -27,6 +28,7 @@ public class RevisionButton extends Button implements Button.ClickListener {
     private final Map changedPaths;
     private final long revision;
     private static final String VIEWVC_URL = "http://lpr-therepo/viewvc/theseos";
+    private static final Logger log = Logger.getLogger(RevisionButton.class);
 
     public RevisionButton(long revision, Map changedPaths, VerticalLayout files) {
         super(""+revision);
@@ -78,7 +80,7 @@ public class RevisionButton extends Button implements Button.ClickListener {
         } else if (value == 'M') {
             link += getParam(revision);
         } else {
-            System.out.println("Unknown value: "+value);
+            log.warn("Unknown value: " + value);
         }
         return new ExternalResource(link);
     }

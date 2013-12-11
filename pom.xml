@@ -107,24 +107,6 @@
           </systemProperties>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.zeroturnaround</groupId>
-        <artifactId>jrebel-maven-plugin</artifactId>
-        <version>1.1.5</version>
-        <configuration>
-            <name>${project.artifactId}-development</name>
-            <version>${project.version}-${maven.build.timestamp}</version>
-        </configuration>
-        <executions>
-          <execution>
-            <id>generate-liverebel-xml</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>generate-liverebel-xml</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
         <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>buildnumber-maven-plugin</artifactId>
@@ -279,7 +261,10 @@
           <artifactId>tableexport</artifactId>
           <version>1.4.0</version>
       </dependency>
-
-
+      <dependency>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+          <version>1.2.16</version>
+      </dependency>
   </dependencies>
 </project>
