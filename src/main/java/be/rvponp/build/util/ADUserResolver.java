@@ -30,7 +30,7 @@ public class ADUserResolver {
 
 
     public static String getFullUsernameByID(String userid){
-        String returnedValue="";
+        String returnedValue = userid;
         Hashtable<String, String> env = new Hashtable<String, String>();
 
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
