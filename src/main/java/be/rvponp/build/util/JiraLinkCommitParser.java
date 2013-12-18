@@ -1,5 +1,7 @@
 package be.rvponp.build.util;
 
+import be.rvponp.build.model.JiraEntry;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;

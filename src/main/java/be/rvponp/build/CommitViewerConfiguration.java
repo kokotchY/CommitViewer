@@ -8,11 +8,10 @@ import java.io.IOException;
 import java.util.Properties;
 
 /**
- * Created with IntelliJ IDEA.
+ * Configuration of CommitViewer
  * User: canas
  * Date: 11/29/13
  * Time: 9:27 AM
- * To change this template use File | Settings | File Templates.
  */
 public class CommitViewerConfiguration {
     private static final String DEFAULT_CONFIG_FILE = System.getProperty("user.home") + File.separator +

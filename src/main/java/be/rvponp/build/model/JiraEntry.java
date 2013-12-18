@@ -1,4 +1,4 @@
-package be.rvponp.build.util;
+package be.rvponp.build.model;
 
 import com.atlassian.jira.rpc.soap.beans.RemoteComponent;
 

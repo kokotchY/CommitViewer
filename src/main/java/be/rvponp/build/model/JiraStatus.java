@@ -1,4 +1,4 @@
-package be.rvponp.build.util;
+package be.rvponp.build.model;
 
 /**
  * User: vermb

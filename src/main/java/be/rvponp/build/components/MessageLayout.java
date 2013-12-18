@@ -1,8 +1,8 @@
 package be.rvponp.build.components;
 
-import be.rvponp.build.util.JiraEntry;
+import be.rvponp.build.model.JiraEntry;
 import be.rvponp.build.util.JiraLinkCommitParser;
-import be.rvponp.build.util.JiraStatus;
+import be.rvponp.build.model.JiraStatus;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;

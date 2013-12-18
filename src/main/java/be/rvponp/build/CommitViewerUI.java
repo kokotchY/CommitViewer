@@ -34,11 +34,11 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -48,7 +48,6 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 /**
  * The Application's "main" class
@@ -56,17 +55,16 @@ import java.util.Set;
 @SuppressWarnings("serial")
 @Theme("mytheme")
 @Title("Commit Viewer")
-public class CommitViewerUI extends UI
-{
+public class CommitViewerUI extends UI {
 
     private ComboBox fromVersion;
     private ComboBox toVersion;
     private Table table;
     private VerticalLayout files;
+    private static final Logger log = Logger.getLogger(CommitViewerUI.class);
 
     @Override
-    protected void init(VaadinRequest vaadinRequest)
-    {
+    protected void init(VaadinRequest vaadinRequest) {
         VerticalLayout layout = new VerticalLayout();
         Label labelBuildDate = new Label("Build date: " + getBuildDate());
         layout.addComponent(labelBuildDate);
@@ -123,7 +121,7 @@ public class CommitViewerUI extends UI
                 excelExport.export();
 
             }
-        });        
+        });
     }
 
     private Tree createTreeComponent() {
@@ -154,7 +152,7 @@ public class CommitViewerUI extends UI
                 }
             }
         } catch (RemoteException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            log.error("Error when retrieving the components", e);
         }
         return tree;
     }
@@ -180,7 +178,7 @@ public class CommitViewerUI extends UI
             }
         }
         return "Unknown";
-    }    
+    }
 
     public void cleanComponents() {
         fromVersion.removeAllItems();

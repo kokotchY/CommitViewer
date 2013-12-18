@@ -1,4 +1,4 @@
-package be.rvponp.build;
+package be.rvponp.build.model;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

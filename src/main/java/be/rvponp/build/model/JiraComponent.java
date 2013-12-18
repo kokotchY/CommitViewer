@@ -1,11 +1,10 @@
 package be.rvponp.build.model;
 
 /**
- * Created with IntelliJ IDEA.
+ * A jira component
  * User: canas
  * Date: 12/17/13
  * Time: 11:56 PM
- * To change this template use File | Settings | File Templates.
  */
 public class JiraComponent {
 

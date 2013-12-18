@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
+ * A jira project
  * User: canas
  * Date: 12/17/13
  * Time: 11:56 PM
- * To change this template use File | Settings | File Templates.
  */
 public class JiraProject {
 
@@ -35,5 +34,9 @@ public class JiraProject {
 
     public void addComponent(JiraComponent component) {
         components.add(component);
+    }
+
+    public List<JiraComponent> getComponents() {
+        return components;
     }
 }

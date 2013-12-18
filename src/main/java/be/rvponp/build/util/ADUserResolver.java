@@ -5,12 +5,13 @@ import org.apache.log4j.Logger;
 
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
-import javax.naming.directory.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.BasicAttribute;
+import javax.naming.directory.BasicAttributes;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.SearchResult;
 import java.util.Hashtable;
-import java.util.Properties;
 
 /**
  * User: vermb

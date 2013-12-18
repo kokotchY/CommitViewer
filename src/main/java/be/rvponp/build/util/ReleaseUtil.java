@@ -1,6 +1,6 @@
 package be.rvponp.build.util;
 
-import be.rvponp.build.Release;
+import be.rvponp.build.model.Release;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;

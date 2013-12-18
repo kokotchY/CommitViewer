@@ -7,6 +7,8 @@ import java.util.*;
 
 
 import be.rvponp.build.CommitViewerConfiguration;
+import be.rvponp.build.model.JiraEntry;
+import be.rvponp.build.model.JiraStatus;
 import com.atlassian.jira.rpc.exception.RemoteAuthenticationException;
 import com.atlassian.jira.rpc.exception.RemotePermissionException;
 import com.atlassian.jira.rpc.soap.beans.RemoteComponent;

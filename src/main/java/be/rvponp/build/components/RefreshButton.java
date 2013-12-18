@@ -1,7 +1,7 @@
 package be.rvponp.build.components;
 
 import be.rvponp.build.CommitViewerUI;
-import be.rvponp.build.Release;
+import be.rvponp.build.model.Release;
 import be.rvponp.build.util.ReleaseUtil;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Button;

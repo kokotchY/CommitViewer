@@ -1,7 +1,7 @@
 package be.rvponp.build.components;
 
 import be.rvponp.build.util.ADUserResolver;
-import be.rvponp.build.util.JiraEntry;
+import be.rvponp.build.model.JiraEntry;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;

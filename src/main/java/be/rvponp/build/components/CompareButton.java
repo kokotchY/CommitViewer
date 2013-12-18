@@ -3,17 +3,15 @@ package be.rvponp.build.components;
 import be.rvponp.build.model.JiraComponent;
 import be.rvponp.build.model.JiraProject;
 import be.rvponp.build.util.ADUserResolver;
-import be.rvponp.build.util.JiraEntry;
+import be.rvponp.build.model.JiraEntry;
 import be.rvponp.build.util.JiraLinkCommitParser;
 import be.rvponp.build.util.Util;
 import com.atlassian.jira.rpc.soap.beans.RemoteComponent;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.server.VaadinService;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Tree;
@@ -59,7 +57,6 @@ public class CompareButton extends Button implements Button.ClickListener {
     private final ComboBox toVersion;
     private final Table table;
     private final VerticalLayout files;
-    private final String pathIcon = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
     private final CheckBox jiraParsing;
     private static final Logger log = Logger.getLogger(CompareButton.class);
     private final Tree tree;
@@ -138,10 +135,8 @@ public class CompareButton extends Button implements Button.ClickListener {
                             if (!displayCommit) {
                                 for (JiraComponent component : components) {
                                     for (RemoteComponent remoteComponent : jiraEntry.getComponent()) {
-                                        for (JiraComponent jiraComponent : components) {
-                                            if (remoteComponent.getName().equals(jiraComponent.getName())) {
-                                                displayCommit = true;
-                                            }
+                                        if (remoteComponent.getName().equals(component.getName())) {
+                                            displayCommit = true;
                                         }
                                     }
                                 }
@@ -164,7 +159,7 @@ public class CompareButton extends Button implements Button.ClickListener {
                 }
                 String stringFilter = getStringFilter(projects, components);
                 if (!stringFilter.isEmpty()) {
-                    table.setCaption("Commits ("+table.getItemIds().size()+","+ stringFilter +")");
+                    table.setCaption("Commits (" + table.getItemIds().size() + "," + stringFilter + ")");
                 } else {
                     table.setCaption("Commits (" + table.getItemIds().size() + ")");
                 }
@@ -195,7 +190,7 @@ public class CompareButton extends Button implements Button.ClickListener {
             builderComponents.append("components=[");
             int idx = 0;
             for (JiraComponent component : components) {
-                builderComponents.append(component.getName() + "@" + component.getJiraProject().getName());
+                builderComponents.append(component.getName()).append("@").append(component.getJiraProject().getName());
                 if (idx++ < components.size() - 1) {
                     builderComponents.append(",");
                 }
@@ -228,7 +223,7 @@ public class CompareButton extends Button implements Button.ClickListener {
 
     private List<JiraComponent> getComponents(Tree tree) {
         List<JiraComponent> result = new ArrayList<JiraComponent>();
-        Set set = (Set)tree.getValue();
+        Set set = (Set) tree.getValue();
         for (Object o : set) {
             if (o instanceof JiraComponent) {
                 result.add((JiraComponent) o);
@@ -239,7 +234,7 @@ public class CompareButton extends Button implements Button.ClickListener {
 
     private List<JiraProject> getProjects(Tree tree) {
         List<JiraProject> result = new ArrayList<JiraProject>();
-        Set set = (Set)tree.getValue();
+        Set set = (Set) tree.getValue();
         for (Object o : set) {
             if (o instanceof JiraProject) {
                 result.add((JiraProject) o);
