@@ -18,6 +18,11 @@ package be.rvponp.build;
 import be.rvponp.build.components.CompareButton;
 import be.rvponp.build.components.MessageLayout;
 import be.rvponp.build.components.RefreshButton;
+import be.rvponp.build.model.JiraComponent;
+import be.rvponp.build.model.JiraProject;
+import be.rvponp.build.util.Jira;
+import be.rvponp.build.util.SOAPSession;
+import com.atlassian.jira.rpc.soap.beans.RemoteComponent;
 import com.vaadin.addon.tableexport.ExcelExport;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
@@ -31,6 +36,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
@@ -38,7 +44,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * The Application's "main" class
@@ -51,7 +61,6 @@ public class CommitViewerUI extends UI
 
     private ComboBox fromVersion;
     private ComboBox toVersion;
-    private ListSelect filterJira;
     private Table table;
     private VerticalLayout files;
 
@@ -64,18 +73,11 @@ public class CommitViewerUI extends UI
         FormLayout formLayout = new FormLayout();
         fromVersion = new ComboBox("From release");
         toVersion = new ComboBox("To release");
-        filterJira = new ListSelect("Jira filter");
-        filterJira.setMultiSelect(true);
-        filterJira.addItem("No filter");
-        filterJira.addItem("PRODUCTION");
-        filterJira.addItem("ID");
-        filterJira.addItem("PAYTWO");
-        filterJira.addItem("ATTRIB");
-        filterJira.setSizeUndefined();
 
         formLayout.addComponent(fromVersion);
         formLayout.addComponent(toVersion);
-//        formLayout.addComponent(filterJira);
+        final Tree tree = createTreeComponent();
+        formLayout.addComponent(tree);
         table = new Table("Commits");
         table.addContainerProperty("Revision", Button.class, 0L);
         table.addContainerProperty("Date", Date.class, new Date());
@@ -91,7 +93,8 @@ public class CommitViewerUI extends UI
         files = new VerticalLayout();
         CheckBox jiraParsing = new CheckBox("Jira Parsing");
         jiraParsing.setValue(true);
-        CompareButton compareButton = new CompareButton(fromVersion, toVersion, table, files, filterJira, jiraParsing);
+        CompareButton compareButton = new CompareButton(fromVersion, toVersion, table, files,
+                jiraParsing, tree);
         formLayout.addComponent(compareButton);
         RefreshButton refreshButton = new RefreshButton(this, fromVersion, toVersion);
         refreshButton.buttonClick(null);
@@ -121,6 +124,39 @@ public class CommitViewerUI extends UI
 
             }
         });        
+    }
+
+    private Tree createTreeComponent() {
+        Tree tree = new Tree("Projects and components");
+        tree.setMultiSelect(true);
+        List<JiraProject> projects = new ArrayList<JiraProject>();
+        projects.add(new JiraProject("PRODUCTION"));
+        projects.add(new JiraProject("VAAD"));
+        projects.add(new JiraProject("ID"));
+        projects.add(new JiraProject("PAYTWO"));
+        try {
+            SOAPSession jiraWebService = Jira.getJiraWebService();
+
+            for (JiraProject project : projects) {
+                tree.addItem(project);
+                RemoteComponent[] components = jiraWebService.getJiraSoapService().getComponents(jiraWebService
+                        .getAuthenticationToken(), project.getName());
+                if (components.length == 0) {
+                    tree.setChildrenAllowed(project, false);
+                } else {
+                    for (RemoteComponent component : components) {
+                        JiraComponent jiraComponent = new JiraComponent(project, component.getName());
+                        project.addComponent(jiraComponent);
+                        tree.addItem(jiraComponent);
+                        tree.setParent(jiraComponent, project);
+                        tree.setChildrenAllowed(jiraComponent, false);
+                    }
+                }
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        return tree;
     }
 
     private String getBuildDate() {

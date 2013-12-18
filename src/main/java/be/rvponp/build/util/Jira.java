@@ -9,6 +9,7 @@ import java.util.*;
 import be.rvponp.build.CommitViewerConfiguration;
 import com.atlassian.jira.rpc.exception.RemoteAuthenticationException;
 import com.atlassian.jira.rpc.exception.RemotePermissionException;
+import com.atlassian.jira.rpc.soap.beans.RemoteComponent;
 import com.atlassian.jira.rpc.soap.beans.RemoteCustomFieldValue;
 import com.atlassian.jira.rpc.soap.beans.RemoteIssue;
 import com.atlassian.jira.rpc.soap.beans.RemoteVersion;
@@ -37,7 +38,7 @@ public class Jira {
 
     }
 
-    private static SOAPSession getJiraWebService(){
+    public static SOAPSession getJiraWebService(){
         if(jiraWebService == null){
             new Jira();
         }
@@ -67,6 +68,7 @@ public class Jira {
                 jiraEntry.setStatus(JiraStatus.values()[Integer.valueOf(remoteIssue.getStatus())]);
                 jiraEntry.setFixVersion(fixVersions);
                 jiraEntry.setAssignee(remoteIssue.getAssignee());
+                jiraEntry.setComponent(remoteIssue.getComponents());
             } catch (RemoteAuthenticationException m){
                 log.warn("Probably disconnected. Try to reconnect.");
                 connectionTry++;
@@ -91,8 +93,12 @@ public class Jira {
 
     private static String getCustomFieldValue(RemoteCustomFieldValue field) {
         StringBuilder builder = new StringBuilder("[");
+        int idx = 0;
         for (String value : field.getValues()) {
-            builder.append(value).append(",");
+            builder.append(value);
+            if (idx++ < field.getValues().length-1) {
+                builder.append(",");
+            }
         }
         builder.append("]");
         return builder.toString();
@@ -103,6 +109,7 @@ public class Jira {
         jiraEntry.setFixVersion("Unknown");
         jiraEntry.setAssignee("Unknown");
         jiraEntry.setValid(true);
+        jiraEntry.setComponent(new RemoteComponent[0]);
     }
 
     public static List<JiraEntry> getJiraByIds(List<String> ids, Boolean parsingJira){

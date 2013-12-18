@@ -1,9 +1,12 @@
 package be.rvponp.build.components;
 
+import be.rvponp.build.model.JiraComponent;
+import be.rvponp.build.model.JiraProject;
 import be.rvponp.build.util.ADUserResolver;
 import be.rvponp.build.util.JiraEntry;
 import be.rvponp.build.util.JiraLinkCommitParser;
 import be.rvponp.build.util.Util;
+import com.atlassian.jira.rpc.soap.beans.RemoteComponent;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinService;
 import com.vaadin.ui.Button;
@@ -13,6 +16,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.Tree;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.BaseTheme;
 import org.apache.http.HttpEntity;
@@ -36,10 +40,12 @@ import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * User: canas
@@ -53,21 +59,21 @@ public class CompareButton extends Button implements Button.ClickListener {
     private final ComboBox toVersion;
     private final Table table;
     private final VerticalLayout files;
-    private final ListSelect filterJira;
     private final String pathIcon = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
     private final CheckBox jiraParsing;
     private static final Logger log = Logger.getLogger(CompareButton.class);
+    private final Tree tree;
 
-    public CompareButton(ComboBox fromVersion, ComboBox toVersion, Table table, VerticalLayout files, ListSelect filterJira, CheckBox jiraParsing) {
+    public CompareButton(ComboBox fromVersion, ComboBox toVersion, Table table, VerticalLayout files, CheckBox jiraParsing, Tree tree) {
         super("Compare");
         this.fromVersion = fromVersion;
         this.toVersion = toVersion;
         this.table = table;
         this.files = files;
-        this.filterJira = filterJira;
         addClickListener(this);
         this.setIcon(new ThemeResource("img/view.png"));
         this.jiraParsing = jiraParsing;
+        this.tree = tree;
     }
 
 
@@ -100,6 +106,8 @@ public class CompareButton extends Button implements Button.ClickListener {
             try {
                 Collection log = repository.log(new String[]{""}, null, startRevision, endRevision, true, true);
                 int index = 0;
+                List<JiraProject> projects = getProjects(tree);
+                List<JiraComponent> components = getCleanedComponents(projects, getComponents(tree));
                 for (Object o : log) {
                     SVNLogEntry entry = (SVNLogEntry) o;
                     int nbFiles = getNumberFiles(entry);
@@ -112,21 +120,132 @@ public class CompareButton extends Button implements Button.ClickListener {
                     for (JiraEntry jiraEntry : listJira) {
                         resolvedOn.append(jiraEntry.getResolvedOn());
                     }
-                    table.addItem(new Object[]{
-                            buttonRevision,
-                            entry.getDate(),
-                            new MessageLayout(entry.getMessage(), jiraParsing.getValue()),
-                            new Label(resolvedOn.toString()),
-                            new JiraAssigneesLayout(listJira),
-                            new Label(ADUserResolver.getFullUsernameByID(entry.getAuthor())),
-                            nbFiles},
-                            index++);
+                    boolean displayCommit = false;
+
+                    // Nothing selected
+                    if (projects.size() == 0 && components.size() == 0) {
+                        displayCommit = true;
+                    } else {
+                        for (JiraEntry jiraEntry : listJira) {
+                            for (JiraProject project : projects) {
+                                if (jiraEntry.getId().startsWith(project.getName())) {
+                                    displayCommit = true;
+                                }
+                                if (displayCommit) {
+                                    break;
+                                }
+                            }
+                            if (!displayCommit) {
+                                for (JiraComponent component : components) {
+                                    for (RemoteComponent remoteComponent : jiraEntry.getComponent()) {
+                                        for (JiraComponent jiraComponent : components) {
+                                            if (remoteComponent.getName().equals(jiraComponent.getName())) {
+                                                displayCommit = true;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (displayCommit) {
+                        table.addItem(new Object[]{
+                                buttonRevision,
+                                entry.getDate(),
+                                new MessageLayout(entry.getMessage(), jiraParsing.getValue()),
+                                new Label(resolvedOn.toString()),
+                                new JiraAssigneesLayout(listJira),
+                                new Label(ADUserResolver.getFullUsernameByID(entry.getAuthor())),
+                                nbFiles},
+                                index++);
+                    }
                     //table.addGeneratedColumn("Jiras",new MessageColumnGenerator(JiraLinkCommitParser.parseJiraIdentifier(entry.getMessage())));
+                }
+                String stringFilter = getStringFilter(projects, components);
+                if (!stringFilter.isEmpty()) {
+                    table.setCaption("Commits ("+table.getItemIds().size()+","+ stringFilter +")");
+                } else {
+                    table.setCaption("Commits (" + table.getItemIds().size() + ")");
                 }
             } catch (SVNException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private String getStringFilter(List<JiraProject> projects, List<JiraComponent> components) {
+        StringBuilder builderProject = new StringBuilder();
+        if (projects.size() > 0) {
+            builderProject.append("projects=[");
+            int idx = 0;
+            for (JiraProject project : projects) {
+                builderProject.append(project.getName());
+                if (idx++ < projects.size() - 1) {
+                    builderProject.append(",");
+                }
+            }
+            builderProject.append("]");
+        }
+
+        StringBuilder builderComponents = new StringBuilder();
+        boolean hasComponents = false;
+        if (components.size() > 0) {
+            hasComponents = true;
+            builderComponents.append("components=[");
+            int idx = 0;
+            for (JiraComponent component : components) {
+                builderComponents.append(component.getName() + "@" + component.getJiraProject().getName());
+                if (idx++ < components.size() - 1) {
+                    builderComponents.append(",");
+                }
+            }
+            builderComponents.append("]");
+        }
+
+        if (hasComponents) {
+            return builderProject.append(",").append(builderComponents).toString();
+        } else {
+            return builderProject.toString();
+        }
+    }
+
+    private List<JiraComponent> getCleanedComponents(List<JiraProject> projects, List<JiraComponent> components) {
+        List<JiraComponent> cleanedComponents = new ArrayList<JiraComponent>();
+        for (JiraComponent component : components) {
+            boolean toBeKept = true;
+            for (JiraProject project : projects) {
+                if (component.getJiraProject() == project) {
+                    toBeKept = false;
+                }
+            }
+            if (toBeKept) {
+                cleanedComponents.add(component);
+            }
+        }
+        return cleanedComponents;
+    }
+
+    private List<JiraComponent> getComponents(Tree tree) {
+        List<JiraComponent> result = new ArrayList<JiraComponent>();
+        Set set = (Set)tree.getValue();
+        for (Object o : set) {
+            if (o instanceof JiraComponent) {
+                result.add((JiraComponent) o);
+            }
+        }
+        return result;
+    }
+
+    private List<JiraProject> getProjects(Tree tree) {
+        List<JiraProject> result = new ArrayList<JiraProject>();
+        Set set = (Set)tree.getValue();
+        for (Object o : set) {
+            if (o instanceof JiraProject) {
+                result.add((JiraProject) o);
+            }
+        }
+        return result;
     }
 
     private int getNumberFiles(SVNLogEntry entry) {

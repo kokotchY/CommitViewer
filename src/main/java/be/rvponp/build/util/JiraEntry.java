@@ -1,5 +1,7 @@
 package be.rvponp.build.util;
 
+import com.atlassian.jira.rpc.soap.beans.RemoteComponent;
+
 /**
  * User: vermb
  * Date: 7/30/13
@@ -16,6 +18,7 @@ public class JiraEntry {
     private boolean valid;
     private String externalLink;
     private String resolvedOn;
+    private RemoteComponent[] component;
 
     public JiraEntry(String id, JiraStatus status, String fixVersion) {
         this.id = id;
@@ -97,5 +100,13 @@ public class JiraEntry {
 
     public String getResolvedOn() {
         return resolvedOn;
+    }
+
+    public void setComponent(RemoteComponent[] component) {
+        this.component = component;
+    }
+
+    public RemoteComponent[] getComponent() {
+        return component;
     }
 }
