@@ -24,10 +24,8 @@ import be.rvponp.build.model.JiraProject;
 import be.rvponp.build.util.Jira;
 import be.rvponp.build.util.SOAPSession;
 import com.atlassian.jira.rpc.soap.beans.RemoteComponent;
-import com.vaadin.addon.tableexport.ExcelExport;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
-import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
@@ -67,10 +65,11 @@ public class CommitViewerUI extends UI {
     @Override
     protected void init(VaadinRequest vaadinRequest) {
         VerticalLayout layout = new VerticalLayout();
+
+        VerticalLayout infoLayout = new VerticalLayout();
         layout.setSizeFull();
         HorizontalLayout buildDateLayout = createBuildDateLayout();
-        layout.addComponent(buildDateLayout);
-        layout.setExpandRatio(buildDateLayout, 1);
+        infoLayout.addComponent(buildDateLayout);
 
         table = createCommitsTable();
         files = new VerticalLayout();
@@ -87,13 +86,14 @@ public class CommitViewerUI extends UI {
         filesLayout.addComponent(files);
         filesLayout.setVisible(false);
         filesLayout.setSizeFull();
+        infoLayout.addComponent(filtersLayout);
+        infoLayout.setSizeUndefined();
 
-        layout.addComponent(filtersLayout);
-        layout.setExpandRatio(filtersLayout, 1);
+        layout.addComponent(infoLayout);
         layout.addComponent(tableLayout);
-        layout.setExpandRatio(tableLayout, 2);
+        layout.setExpandRatio(tableLayout, 1);
         layout.addComponent(filesLayout);
-        layout.setExpandRatio(filesLayout, 1);
+        layout.setExpandRatio(filesLayout, 0);
 
         layout.addComponent(new ExportXLSButton("Export XLS", table, fromVersion, toVersion));
 
