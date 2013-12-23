@@ -16,6 +16,7 @@
 package be.rvponp.build;
 
 import be.rvponp.build.components.CompareButton;
+import be.rvponp.build.components.ExportXLSButton;
 import be.rvponp.build.components.MessageLayout;
 import be.rvponp.build.components.RefreshButton;
 import be.rvponp.build.model.JiraComponent;
@@ -23,10 +24,8 @@ import be.rvponp.build.model.JiraProject;
 import be.rvponp.build.util.Jira;
 import be.rvponp.build.util.SOAPSession;
 import com.atlassian.jira.rpc.soap.beans.RemoteComponent;
-import com.vaadin.addon.tableexport.ExcelExport;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
-import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
@@ -34,6 +33,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
@@ -66,17 +66,90 @@ public class CommitViewerUI extends UI {
     @Override
     protected void init(VaadinRequest vaadinRequest) {
         VerticalLayout layout = new VerticalLayout();
+
+        VerticalLayout infoLayout = new VerticalLayout();
+        layout.setSizeFull();
+        HorizontalLayout buildDateLayout = createBuildDateLayout();
+        infoLayout.addComponent(buildDateLayout);
+
+        table = createCommitsTable();
+        files = new VerticalLayout();
+        Label filesLabel = new Label("Files");
+        VerticalLayout filesLayout = new VerticalLayout();
+
+        HorizontalLayout filtersLayout = createFiltersLayout(table, files, filesLayout);
+
+        VerticalLayout tableLayout = new VerticalLayout();
+        tableLayout.addComponent(table);
+        tableLayout.setSizeFull();
+
+        filesLayout.addComponent(filesLabel);
+        filesLayout.addComponent(files);
+        filesLayout.setVisible(false);
+        filesLayout.setSizeFull();
+        infoLayout.addComponent(new Panel(filtersLayout));
+        infoLayout.setSizeUndefined();
+
+        layout.addComponent(infoLayout);
+        layout.addComponent(tableLayout);
+        layout.setExpandRatio(tableLayout, 1);
+        layout.addComponent(filesLayout);
+        layout.setExpandRatio(filesLayout, 0);
+
+        layout.addComponent(new ExportXLSButton("Export XLS", table, fromVersion, toVersion));
+        layout.setMargin(true);
+        setContent(layout);
+
+    }
+
+    private HorizontalLayout createBuildDateLayout() {
+        HorizontalLayout buildDateLayout = new HorizontalLayout();
         Label labelBuildDate = new Label("Build date: " + getBuildDate());
-        layout.addComponent(labelBuildDate);
-        FormLayout formLayout = new FormLayout();
+        buildDateLayout.addComponent(labelBuildDate);
+        labelBuildDate.setSizeUndefined();
+        buildDateLayout.setSizeUndefined();
+        return buildDateLayout;
+    }
+
+    private HorizontalLayout createFiltersLayout(Table table, VerticalLayout files, VerticalLayout filesLayout) {
+        HorizontalLayout filtersLayout = new HorizontalLayout();
+
+        FormLayout formReleaseLayout = new FormLayout();
         fromVersion = new ComboBox("From release");
         toVersion = new ComboBox("To release");
+        filtersLayout.addComponent(formReleaseLayout);
+        formReleaseLayout.setDescription("formReleaseLayout");
 
-        formLayout.addComponent(fromVersion);
-        formLayout.addComponent(toVersion);
+        formReleaseLayout.addComponent(fromVersion);
+        formReleaseLayout.addComponent(toVersion);
+        formReleaseLayout.setSizeUndefined();
+
+//        FormLayout jiraTreeLayout = new FormLayout();
         final Tree tree = createTreeComponent();
-        formLayout.addComponent(tree);
-        table = new Table("Commits");
+//        jiraTreeLayout.addComponent(tree);
+        filtersLayout.addComponent(tree);
+
+
+        CheckBox jiraParsing = new CheckBox("Jira Parsing");
+        jiraParsing.setValue(true);
+//        filtersLayout.addComponent(jiraParsing);
+
+        FormLayout buttonsLayout = new FormLayout();
+        CompareButton compareButton = new CompareButton(fromVersion, toVersion, table, files,
+                jiraParsing, tree, filesLayout);
+        RefreshButton refreshButton = new RefreshButton(this, fromVersion, toVersion);
+//        refreshButton.buttonClick(null);
+//        compareButton.buttonClick(null);
+        buttonsLayout.addComponent(refreshButton);
+        buttonsLayout.addComponent(compareButton);
+        buttonsLayout.setSizeUndefined();
+        filtersLayout.addComponent(buttonsLayout);
+        filtersLayout.setSizeUndefined();
+        return filtersLayout;
+    }
+
+    private Table createCommitsTable() {
+        Table table = new Table("Commits");
         table.addContainerProperty("Revision", Button.class, 0L);
         table.addContainerProperty("Date", Date.class, new Date());
         table.addContainerProperty("Message", MessageLayout.class, "Message");
@@ -86,42 +159,8 @@ public class CommitViewerUI extends UI {
         table.addContainerProperty("# Files", Integer.class, 0);
         //Object[] columns = new Object[]{"Revision", "Date","Jiras","Message", "Author","# Files"};
         //table.setVisibleColumns(columns);
-
         table.setSizeFull();
-        files = new VerticalLayout();
-        CheckBox jiraParsing = new CheckBox("Jira Parsing");
-        jiraParsing.setValue(true);
-        CompareButton compareButton = new CompareButton(fromVersion, toVersion, table, files,
-                jiraParsing, tree);
-        formLayout.addComponent(compareButton);
-        RefreshButton refreshButton = new RefreshButton(this, fromVersion, toVersion);
-        refreshButton.buttonClick(null);
-        compareButton.buttonClick(null);
-        formLayout.addComponent(refreshButton);
-        formLayout.addComponent(jiraParsing);
-        layout.addComponent(formLayout);
-        layout.addComponent(table);
-        layout.addComponent(new Label("Files"));
-        layout.addComponent(files);
-
-        Button exportToXLS = new Button("Export XLS");
-        exportToXLS.setIcon(new ThemeResource("img/table.png"));
-        layout.addComponent(exportToXLS);
-
-        setContent(layout);
-
-        exportToXLS.addClickListener(new Button.ClickListener() {
-            private ExcelExport excelExport;
-
-            @Override
-            public void buttonClick(Button.ClickEvent clickEvent) {
-                excelExport = new ExcelExport(table);
-                excelExport.excludeCollapsedColumns();
-                excelExport.setReportTitle("CommitViewer Report - from " + fromVersion.getValue() + " to " + toVersion.getValue());
-                excelExport.export();
-
-            }
-        });
+        return table;
     }
 
     private Tree createTreeComponent() {
@@ -153,6 +192,11 @@ public class CommitViewerUI extends UI {
             }
         } catch (RemoteException e) {
             log.error("Error when retrieving the components", e);
+            tree.removeAllItems();
+            for (JiraProject project : projects) {
+                tree.addItem(project);
+                tree.setChildrenAllowed(project, false);
+            }
         }
         return tree;
     }
