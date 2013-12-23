@@ -29,18 +29,22 @@ public class RevisionButton extends Button implements Button.ClickListener {
     private final long revision;
     private static final String VIEWVC_URL = "http://lpr-therepo/viewvc/theseos";
     private static final Logger log = Logger.getLogger(RevisionButton.class);
+    private final VerticalLayout filesLayout;
 
-    public RevisionButton(long revision, Map changedPaths, VerticalLayout files) {
+    public RevisionButton(long revision, Map changedPaths, VerticalLayout files, VerticalLayout filesLayout) {
         super(""+revision);
         addClickListener(this);
         this.changedPaths = changedPaths;
         this.files = files;
         this.revision = revision;
+        this.filesLayout = filesLayout;
     }
 
     @Override
     public void buttonClick(ClickEvent clickEvent) {
         files.removeAllComponents();
+        filesLayout.setVisible(true);
+        filesLayout.setImmediate(true);
         for (Object o : changedPaths.entrySet()) {
             Map.Entry entry = (Map.Entry)o;
             if (Util.isFile(entry.getKey())) {

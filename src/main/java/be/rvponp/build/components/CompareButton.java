@@ -60,8 +60,9 @@ public class CompareButton extends Button implements Button.ClickListener {
     private final CheckBox jiraParsing;
     private static final Logger log = Logger.getLogger(CompareButton.class);
     private final Tree tree;
+    private final VerticalLayout filesLayout;
 
-    public CompareButton(ComboBox fromVersion, ComboBox toVersion, Table table, VerticalLayout files, CheckBox jiraParsing, Tree tree) {
+    public CompareButton(ComboBox fromVersion, ComboBox toVersion, Table table, VerticalLayout files, CheckBox jiraParsing, Tree tree, VerticalLayout filesLayout) {
         super("Compare");
         this.fromVersion = fromVersion;
         this.toVersion = toVersion;
@@ -71,6 +72,7 @@ public class CompareButton extends Button implements Button.ClickListener {
         this.setIcon(new ThemeResource("img/view.png"));
         this.jiraParsing = jiraParsing;
         this.tree = tree;
+        this.filesLayout = filesLayout;
     }
 
 
@@ -110,7 +112,8 @@ public class CompareButton extends Button implements Button.ClickListener {
                     int nbFiles = getNumberFiles(entry);
                     //message.setContentMode(ContentMode.HTML);
                     long revision = entry.getRevision();
-                    RevisionButton buttonRevision = new RevisionButton(revision, entry.getChangedPaths(), files);
+                    RevisionButton buttonRevision = new RevisionButton(revision, entry.getChangedPaths(), files,
+                            filesLayout);
                     buttonRevision.setStyleName(BaseTheme.BUTTON_LINK);
                     List<JiraEntry> listJira = JiraLinkCommitParser.parseJiraIdentifier(entry.getMessage(), jiraParsing.getValue());
                     StringBuilder resolvedOn = new StringBuilder();

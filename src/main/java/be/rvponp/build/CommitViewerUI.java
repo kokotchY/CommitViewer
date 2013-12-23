@@ -33,6 +33,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
@@ -74,19 +75,19 @@ public class CommitViewerUI extends UI {
         table = createCommitsTable();
         files = new VerticalLayout();
         Label filesLabel = new Label("Files");
+        VerticalLayout filesLayout = new VerticalLayout();
 
-        HorizontalLayout filtersLayout = createFiltersLayout(table, files);
+        HorizontalLayout filtersLayout = createFiltersLayout(table, files, filesLayout);
 
         VerticalLayout tableLayout = new VerticalLayout();
         tableLayout.addComponent(table);
         tableLayout.setSizeFull();
 
-        VerticalLayout filesLayout = new VerticalLayout();
         filesLayout.addComponent(filesLabel);
         filesLayout.addComponent(files);
         filesLayout.setVisible(false);
         filesLayout.setSizeFull();
-        infoLayout.addComponent(filtersLayout);
+        infoLayout.addComponent(new Panel(filtersLayout));
         infoLayout.setSizeUndefined();
 
         layout.addComponent(infoLayout);
@@ -96,7 +97,7 @@ public class CommitViewerUI extends UI {
         layout.setExpandRatio(filesLayout, 0);
 
         layout.addComponent(new ExportXLSButton("Export XLS", table, fromVersion, toVersion));
-
+        layout.setMargin(true);
         setContent(layout);
 
     }
@@ -110,7 +111,7 @@ public class CommitViewerUI extends UI {
         return buildDateLayout;
     }
 
-    private HorizontalLayout createFiltersLayout(Table table, VerticalLayout files) {
+    private HorizontalLayout createFiltersLayout(Table table, VerticalLayout files, VerticalLayout filesLayout) {
         HorizontalLayout filtersLayout = new HorizontalLayout();
 
         FormLayout formReleaseLayout = new FormLayout();
@@ -135,7 +136,7 @@ public class CommitViewerUI extends UI {
 
         FormLayout buttonsLayout = new FormLayout();
         CompareButton compareButton = new CompareButton(fromVersion, toVersion, table, files,
-                jiraParsing, tree);
+                jiraParsing, tree, filesLayout);
         RefreshButton refreshButton = new RefreshButton(this, fromVersion, toVersion);
 //        refreshButton.buttonClick(null);
 //        compareButton.buttonClick(null);
