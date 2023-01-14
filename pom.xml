@@ -8,7 +8,7 @@
   <name>CommitViewer</name>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <vaadin.version>7.7.22</vaadin.version>
+    <vaadin.version>7.7.24</vaadin.version>
     <gwt.version>2.3.0</gwt.version>
     <gwt.plugin.version>2.2.0</gwt.plugin.version>
   </properties>
@@ -23,7 +23,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
+        <configuration>/
           <source>1.6</source>
           <target>1.6</target>
         </configuration>
@@ -233,7 +233,7 @@
       <dependency>
           <groupId>commons-io</groupId>
           <artifactId>commons-io</artifactId>
-          <version>2.1</version>
+          <version>2.7</version>
       </dependency>
       <dependency>
           <groupId>axis</groupId>
